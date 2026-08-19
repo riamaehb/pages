@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Verification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --maroon:#7B1113;
+    --maroon-dark:#5A0C0E;
+    --green:#014421;
+    --green-bg:#E7EFEA;
+    --maroon-bg:#F3E7E7;
+    --gold:#FFC72C;
+    --ink:#1A1A1A;
+    --ink-soft:#6B6B6B;
+    --line:#E4E1DD;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:#FFFFFF;
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{
+    max-width:520px;
+    margin:0 auto;
+    padding:56px 24px 40px;
+  }
+  .badge{
+    display:inline-block;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--maroon);
+    background:var(--maroon-bg);
+    padding:4px 10px;
+    border-radius:100px;
+    margin-bottom:18px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-optical-sizing:auto;
+    font-weight:600;
+    font-size:clamp(26px,5vw,34px);
+    line-height:1.2;
+    margin:0 0 10px;
+    color:var(--maroon);
+  }
+  .sub{
+    color:var(--ink-soft);
+    font-size:14.5px;
+    line-height:1.6;
+    margin:0 0 32px;
+  }
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-top:4px solid var(--maroon);
+    border-radius:10px;
+    padding:28px;
+    box-shadow:0 2px 4px rgba(0,0,0,.03), 0 10px 28px rgba(0,0,0,.05);
+  }
+  .field{margin-bottom:16px;}
+  .field:last-of-type{margin-bottom:0;}
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:7px;
+  }
+  input[type="text"]{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    padding:12px 13px;
+    border:1px solid var(--line);
+    border-radius:7px;
+    background:#fff;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  input[type="text"]:focus{
+    border-color:var(--maroon);
+    box-shadow:0 0 0 3px rgba(123,17,19,.12);
+  }
+  button{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14.5px;
+    cursor:pointer;
+    border:none;
+    border-radius:7px;
+  }
+  #verifyBtn{
+    width:100%;
+    background:var(--maroon);
+    color:#fff;
+    padding:13px;
+    margin-top:20px;
+    transition:background .15s ease;
+  }
+  #verifyBtn:hover{background:var(--maroon-dark);}
+  #verifyBtn:disabled{opacity:.55;cursor:default;}
+  #verifyBtn:focus-visible, input:focus-visible{
+    outline:2px solid var(--gold);
+    outline-offset:2px;
+  }
+
+  .result{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-top:18px;
+    padding:15px 16px;
+    border-radius:8px;
+    animation:reveal .25s ease;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .result{animation:none;}
+    .seal{animation:none !important;}
+  }
+  @keyframes reveal{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .result.verified{background:var(--green-bg); color:var(--green);}
+  .result.notfound{background:var(--maroon-bg); color:var(--maroon-dark);}
+
+  .seal{
+    flex:0 0 auto;
+    width:32px;height:32px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;
+    font-weight:700;
+  }
+  .result.verified .seal{
+    border:2px solid var(--green);
+    animation:stamp .35s cubic-bezier(.2,1.6,.4,1);
+  }
+  .result.notfound .seal{
+    border:2px solid var(--maroon-dark);
+  }
+  @keyframes stamp{
+    0%{transform:scale(1.7) rotate(-8deg); opacity:0;}
+    100%{transform:scale(1) rotate(0); opacity:1;}
+  }
+  .result-text .headline{font-weight:600; font-size:14.5px;}
+  .result-text .detail{font-size:13px; opacity:.85; margin-top:2px;}
+
+  .note{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:22px;
+    line-height:1.6;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <span class="badge">Demo — sample data only</span>
+  <h1>Student Verification</h1>
+  <p class="sub">Enter a student's last name and first name to check if they're on record.</p>
+
+  <div class="card">
+    <div class="field">
+      <label for="lastName">Last name</label>
+      <input id="lastName" type="text" placeholder="e.g. Reyes" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="firstName">First name</label>
+      <input id="firstName" type="text" placeholder="e.g. Ana" autocomplete="off">
+    </div>
+    <button id="verifyBtn">Verify</button>
+    <div id="result" class="result" hidden></div>
+  </div>
+
+  <p class="note">Try "Reyes, Ana", "Diaz, Marco", or "Cruz, Liza" for this demo.</p>
+
+</div>
+
+<script>
+  // ---- Demo data: salted hashes, not names ----
+  const CONFIG = {
+    salt: 'UP-DEMO-SALT-2026',
+    hashes: new Set([
+      '2637d68f6ddb9db50b2d973300f238d50fdf920b3b985e1fdcdcdd9b2636cf6d', // demo: Reyes, Ana
+      '0241f9a3891bba5ceb87391746d5fde0aba73f6c2199740a86010d307beeb8f0', // demo: Diaz, Marco
+      '8e8f16fc41a4fe828376593f33350c64d9ee06b399524d5d078f390f4c8c9a11'  // demo: Cruz, Liza
+    ])
+  };
+  // ---------------------------------------------
+
+  function normalize(str) {
+    return str.trim().toLowerCase().replace(/[.,]/g, '').replace(/\s+/g, ' ');
+  }
+
+  async function sha256Hex(message) {
+    const enc = new TextEncoder().encode(message);
+    const digest = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  const lastInput = document.getElementById('lastName');
+  const firstInput = document.getElementById('firstName');
+  const verifyBtn = document.getElementById('verifyBtn');
+  const resultEl = document.getElementById('result');
+
+  function showResult(found, last, first) {
+    resultEl.hidden = false;
+    resultEl.className = 'result ' + (found ? 'verified' : 'notfound');
+    resultEl.innerHTML = found
+      ? `<div class="seal">✓</div><div class="result-text"><div class="headline">Verified</div><div class="detail">Matches a record on file.</div></div>`
+      : `<div class="seal">✕</div><div class="result-text"><div class="headline">Not found</div><div class="detail">No matching record for "${first} ${last}".</div></div>`;
+  }
+
+  async function runVerify() {
+    const last = lastInput.value;
+    const first = firstInput.value;
+    if (!last.trim() || !first.trim()) {
+      (last.trim() ? firstInput : lastInput).focus();
+      return;
+    }
+    if (!window.isSecureContext) {
+      resultEl.hidden = false;
+      resultEl.className = 'result notfound';
+      resultEl.innerHTML = `<div class="seal">!</div><div class="result-text"><div class="headline">Can't verify here</div><div class="detail">Open this page over https:// — Web Crypto needs a secure context.</div></div>`;
+      return;
+    }
+    verifyBtn.disabled = true;
+    const key = CONFIG.salt + ':' + normalize(last) + '|' + normalize(first);
+    const hash = await sha256Hex(key);
+    showResult(CONFIG.hashes.has(hash), last.trim(), first.trim());
+    verifyBtn.disabled = false;
+  }
+
+  verifyBtn.addEventListener('click', runVerify);
+  [lastInput, firstInput].forEach(el =>
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') runVerify(); })
+  );
+</script>
+</body>
+</html>
