@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<!--
+  CMSC 198.1 course companion: single-page app, vanilla JS, no build step.
+  BEFORE PUBLISHING, search this file for "REPLACE:" to find every field you need to fill in:
+    - Instructor email / consultation booking link / office details
+    - Resource links you want to swap for your own
+  See README-DEPLOY.md (packaged alongside this file) for Apps Script deployment notes.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMSC 198.1: Special Problem 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style id="app-css">
+:root{
+  --white:#ffffff;
+  --ink:#1b1b19;
+  --ink-soft:#5a564d;
+  --maroon:#7a0c2e;
+  --maroon-deep:#53081f;
+  --maroon-tint:#f8ebee;
+  --green:#0b4028;
+  --green-tint:#eaf2ec;
+  --gold:#a47c1b;
+  --gold-tint:#faf3e0;
+  --line:#e4e0d4;
+  --line-strong:#cfc9b8;
+  --danger:#a3312a;
+  --danger-tint:#fbecea;
+  --font-display:'Fraunces', serif;
+  --font-body:'IBM Plex Sans', sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:var(--white); color:var(--ink);
+  font-family:var(--font-body); font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{ color:var(--maroon); text-decoration-thickness:1px; text-underline-offset:2px; }
+a:hover{ color:var(--maroon-deep); }
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--maroon); color:#fff;
+  padding:10px 16px; z-index:100; border-radius:0 0 6px 0;
+}
+.skip-link:focus{ left:0; }
+.wrap{ max-width:920px; margin:0 auto; padding:0 28px; }
+button{ font-family:var(--font-body); }
+:focus-visible{ outline:2px solid var(--maroon); outline-offset:2px; }
+
+/* nav */
+nav.site-nav{ position:sticky; top:0; z-index:50; background:rgba(255,255,255,0.95); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); }
+.nav-inner{ max-width:1040px; margin:0 auto; padding:0 28px; display:flex; align-items:center; gap:20px; height:56px; }
+.nav-brand{ font-family:var(--font-mono); font-size:13px; font-weight:500; color:var(--maroon); letter-spacing:0.02em; text-decoration:none; }
+.nav-links{ display:flex; gap:18px; list-style:none; margin:0; padding:0; flex:1; flex-wrap:wrap; }
+.nav-links a{ color:var(--ink-soft); font-size:13px; font-weight:500; text-decoration:none; padding:4px 0; border-bottom:1px solid transparent; white-space:nowrap; }
+.nav-links a:hover{ color:var(--maroon); border-bottom-color:var(--maroon); }
+.nav-links a.active{ color:var(--maroon); border-bottom-color:var(--maroon); }
+.nav-toggle{ display:none; background:none; border:1px solid var(--line-strong); border-radius:5px; padding:6px 10px; font-size:13px; color:var(--ink); }
+
+/* generic section/page structure */
+.page{ padding:0 0 64px; }
+header.hero{ padding:64px 0 48px; border-bottom:1px solid var(--line); }
+.hero-kicker{ font-family:var(--font-mono); font-size:13px; color:var(--green); margin:0 0 16px; }
+h1.hero-title{ font-family:var(--font-display); font-weight:600; font-size:clamp(32px,5vw,50px); line-height:1.08; margin:0 0 10px; }
+.hero-sub{ font-size:16px; color:var(--ink-soft); max-width:60ch; margin:0 0 8px; }
+.hero-meta{ font-family:var(--font-mono); font-size:13px; color:var(--ink-soft); margin:0 0 24px; }
+.badge-row{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px; }
+.badge{ font-family:var(--font-mono); font-size:12.5px; padding:6px 12px; border-radius:5px; border:1px solid var(--line-strong); color:var(--ink-soft); background:var(--white); }
+.badge.accent{ border-color:var(--maroon); color:var(--maroon); background:var(--maroon-tint); }
+.hero-actions{ display:flex; gap:12px; flex-wrap:wrap; }
+.btn{ font-family:var(--font-body); font-size:14px; font-weight:500; padding:10px 18px; border-radius:6px; border:1px solid var(--line-strong); background:var(--white); color:var(--ink); text-decoration:none; display:inline-block; cursor:pointer; }
+.btn:hover{ border-color:var(--maroon); color:var(--maroon); }
+.btn-primary{ background:var(--maroon); color:#fff; border-color:var(--maroon); }
+.btn-primary:hover{ background:var(--maroon-deep); border-color:var(--maroon-deep); color:#fff; }
+.btn-sm{ font-size:12.5px; padding:6px 12px; }
+.btn-danger{ border-color:var(--danger); color:var(--danger); }
+.btn-danger:hover{ background:var(--danger-tint); color:var(--danger); }
+
+section{ padding:48px 0; border-bottom:1px solid var(--line); }
+section:last-of-type{ border-bottom:none; }
+.eyebrow{ font-family:var(--font-mono); font-size:12.5px; color:var(--green); text-transform:uppercase; letter-spacing:0.08em; margin:0 0 10px; }
+h2.section-title{ font-family:var(--font-display); font-weight:600; font-size:28px; margin:0 0 20px; }
+.lede{ color:var(--ink-soft); max-width:70ch; margin:0 0 28px; }
+
+/* journey / progress */
+.journey{ position:relative; margin-left:6px; }
+.journey::before{ content:""; position:absolute; left:11px; top:6px; bottom:6px; width:1px; background:var(--line-strong); }
+.stage{ position:relative; padding:0 0 4px 40px; margin-bottom:6px; }
+.stage-link{ display:block; text-decoration:none; color:inherit; padding:12px 16px 12px 0; border-radius:6px; }
+.stage-link:hover{ background:var(--maroon-tint); }
+.stage::before{
+  content:""; position:absolute; left:0; top:14px; width:23px; height:23px; border-radius:50%;
+  background:var(--white); border:2px solid var(--line-strong);
+}
+.stage.status-in-progress::before{ border-color:var(--gold); background:var(--gold-tint); }
+.stage.status-completed::before{ border-color:var(--green); background:var(--green); }
+.stage-num{ font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); }
+.stage-title{ font-size:16px; font-weight:600; margin:2px 0 2px; }
+.stage-status{ font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); }
+.stage-status.status-completed{ color:var(--green); }
+.stage-status.status-in-progress{ color:var(--gold); }
+
+.progress-track{ height:8px; background:var(--line); border-radius:4px; overflow:hidden; margin:12px 0; }
+.progress-fill{ height:100%; background:var(--green); border-radius:4px; }
+.progress-label{ font-family:var(--font-mono); font-size:13px; color:var(--ink-soft); }
+
+/* cards */
+.card-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+.card{ border:1px solid var(--line); border-radius:8px; padding:20px; display:flex; flex-direction:column; gap:8px; }
+.card-label{ font-family:var(--font-mono); font-size:11.5px; color:var(--green); text-transform:uppercase; letter-spacing:0.05em; }
+.card h3{ font-size:16px; margin:0; font-weight:600; }
+.card p{ font-size:13.5px; color:var(--ink-soft); margin:0; flex:1; }
+.card a.dl{ font-family:var(--font-mono); font-size:13px; font-weight:500; text-decoration:none; color:var(--maroon); margin-top:6px; }
+.card a.dl::after{ content:" →"; }
+
+/* module layout */
+.module-header{ padding:40px 0 28px; border-bottom:1px solid var(--line); }
+.module-stage{ font-family:var(--font-mono); font-size:12.5px; color:var(--green); text-transform:uppercase; letter-spacing:0.08em; }
+.module-title{ font-family:var(--font-display); font-weight:600; font-size:32px; margin:8px 0 10px; }
+.module-mapping{ font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft); }
+.module-mapping strong{ color:var(--maroon); font-weight:500; }
+.module-block{ padding:32px 0; border-bottom:1px solid var(--line); }
+.module-block h3{ font-family:var(--font-body); font-size:14px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; margin:0 0 14px; }
+.module-block p.desc{ color:var(--ink-soft); font-size:15px; margin:0 0 16px; }
+.think-list{ list-style:none; margin:0; padding:0; }
+.think-list li{ padding:10px 0; border-top:1px solid var(--line); font-size:14.5px; }
+.think-list li:first-child{ border-top:none; }
+.think-list textarea{ margin-top:8px; }
+
+.field-group{ margin-bottom:18px; }
+.field-label{ display:block; font-size:13.5px; font-weight:500; margin-bottom:6px; }
+.field-hint{ display:block; font-size:12.5px; color:var(--ink-soft); margin-bottom:6px; }
+input[type=text], input[type=date], textarea, select{
+  width:100%; font-family:var(--font-body); font-size:14px; color:var(--ink);
+  border:1px solid var(--line-strong); border-radius:6px; padding:9px 11px; background:var(--white);
+}
+textarea{ min-height:72px; resize:vertical; }
+input[type=text]:focus, textarea:focus, select:focus{ border-color:var(--maroon); }
+
+.candidate-block{ border:1px solid var(--line); border-radius:8px; padding:20px; margin-bottom:16px; }
+.candidate-block h4{ font-size:14px; margin:0 0 14px; font-family:var(--font-mono); color:var(--green); text-transform:uppercase; letter-spacing:0.04em; }
+
+table.dyn{ width:100%; border-collapse:collapse; font-size:13.5px; margin-bottom:12px; }
+table.dyn th{ text-align:left; font-family:var(--font-mono); font-weight:500; font-size:11.5px; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); padding:8px 8px; border-bottom:1px solid var(--line-strong); }
+table.dyn td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+table.dyn td input, table.dyn td select{ font-size:13px; padding:6px 8px; }
+table.dyn td.row-actions{ width:32px; }
+.table-wrap{ overflow-x:auto; }
+.icon-btn{ background:none; border:1px solid var(--line-strong); border-radius:5px; width:26px; height:26px; font-size:14px; line-height:1; color:var(--ink-soft); cursor:pointer; }
+.icon-btn:hover{ border-color:var(--danger); color:var(--danger); }
+
+.checklist{ list-style:none; margin:0; padding:0; }
+.checklist li{ display:flex; align-items:flex-start; gap:10px; padding:9px 0; border-top:1px solid var(--line); font-size:14.5px; }
+.checklist li:first-child{ border-top:none; }
+.checklist input[type=checkbox]{ margin-top:3px; width:16px; height:16px; accent-color:var(--maroon); flex:0 0 auto; }
+.checklist-group-label{ font-family:var(--font-mono); font-size:12px; color:var(--green); text-transform:uppercase; letter-spacing:0.05em; margin:20px 0 4px; }
+.checklist-group-label:first-child{ margin-top:0; }
+
+.callout{ padding:14px 16px; border-radius:6px; font-size:13.5px; margin:0 0 20px; }
+.callout.warning{ border:1px solid var(--gold); background:var(--gold-tint); color:var(--ink-soft); }
+.callout.info{ border:1px solid var(--line-strong); background:var(--white); color:var(--ink-soft); }
+.callout strong{ color:var(--ink); }
+
+.storage-note{ font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); display:flex; align-items:center; gap:6px; margin-top:6px; }
+.storage-note::before{ content:"●"; color:var(--green); font-size:8px; }
+
+.module-nav{ display:flex; justify-content:space-between; align-items:center; padding:32px 0; gap:12px; flex-wrap:wrap; }
+.repeatable-item{ display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+.repeatable-item input{ flex:1; }
+.add-btn{ font-family:var(--font-mono); font-size:12.5px; border:1px dashed var(--line-strong); background:none; color:var(--ink-soft); padding:8px 12px; border-radius:6px; cursor:pointer; }
+.add-btn:hover{ border-color:var(--maroon); color:var(--maroon); }
+
+.contact-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:24px; }
+.contact-item{ border-top:1px solid var(--line); padding-top:12px; }
+.contact-item .k{ font-family:var(--font-mono); font-size:11.5px; color:var(--green); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; }
+.contact-item .v{ font-size:15px; }
+
+.outcome-list{ list-style:none; margin:0; padding:0; }
+.outcome-list li{ display:flex; gap:12px; padding:10px 0; border-top:1px solid var(--line); font-size:14.5px; color:var(--ink-soft); }
+.outcome-list li:first-child{ border-top:none; }
+.outcome-list .n{ font-family:var(--font-mono); color:var(--maroon); flex:0 0 22px; font-size:13px; padding-top:1px; }
+
+table.milestones{ width:100%; border-collapse:collapse; font-size:14px; }
+table.milestones th{ text-align:left; font-family:var(--font-mono); font-weight:500; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); padding:8px 10px; border-bottom:1px solid var(--line-strong); }
+table.milestones td{ padding:12px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+table.milestones td.date{ font-family:var(--font-mono); font-size:13px; white-space:nowrap; }
+table.milestones tr.past td.date{ color:var(--ink-soft); }
+
+footer{ padding:32px 0 56px; }
+footer p{ font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); margin:0 0 6px; }
+footer .footer-note{ max-width:60ch; }
+
+@media (max-width:760px){
+  .nav-links{
+    position:fixed; top:56px; left:0; right:0; background:var(--white);
+    flex-direction:column; gap:0; border-bottom:1px solid var(--line);
+    max-height:0; overflow:hidden; transition:max-height 0.25s ease;
+  }
+  .nav-links.open{ max-height:400px; overflow-y:auto; }
+  .nav-links a{ padding:14px 28px; width:100%; border-bottom:1px solid var(--line); box-sizing:border-box; }
+  .nav-toggle{ display:block; }
+  .card-grid, .contact-grid{ grid-template-columns:1fr; }
+  .table-wrap{ -webkit-overflow-scrolling:touch; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *{ transition:none !important; }
+}
+
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="#/home" class="nav-brand">CMSC 198.1</a>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks">Menu</button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#/home" data-route="home">Home</a></li>
+      <li><a href="#/schedule" data-route="schedule">Schedule</a></li>
+      <li><a href="#/journey" data-route="journey">Your Project</a></li>
+      <li><a href="#/proposal-guide" data-route="proposal-guide">Proposal Guide</a></li>
+      <li><a href="#/resources" data-route="resources">Resources</a></li>
+      <li><a href="#/consultations" data-route="consultations">Consultations</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main id="main"></main>
+
+<footer>
+  <div class="wrap">
+    <p>CMSC 198.1 · Department of Computer Science, College of Science, University of the Philippines Cebu</p>
+    <p class="footer-note">Your responses on this site autosave to this browser only. Your official proposal lives in Overleaf.</p>
+  </div>
+</footer>
+
+<script id="app-data" type="application/json">{"CONFIG": {"code": "CMSC 198.1", "title": "Special Problem 1", "program": "BS Computer Science", "institution": "University of the Philippines Cebu", "unit": "Department of Computer Science, College of Science", "semester": "First Semester, AY 2026–2027", "overleafTemplate": "https://www.overleaf.com/read/rftgnhrmrdnv#333d6d", "dates": {"start": "2026-08-26", "end": "2026-12-10"}, "outcomes": ["State a computing problem in precise, researchable terms and document evidence that it exists.", "Review and critically compare existing systems addressing a similar problem.", "Design a proposed system at the level of architecture, features, and technology stack.", "Draft an implementation plan and testing/assessment strategy.", "Produce a proposal conforming to the required UP format and defend it."]}, "MILESTONES": [{"date": "2026-08-26", "label": "Aug 26", "title": "Discuss course guide", "kind": "start"}, {"date": "2026-09-09", "label": "Sep 9", "title": "Finalize problem", "kind": "due", "module": 1}, {"date": "2026-09-30", "label": "Sep 30", "title": "Complete Introduction", "kind": "due", "module": 3}, {"date": "2026-10-14", "label": "Oct 14", "title": "Review of Existing Alternatives", "kind": "due", "module": 5}, {"date": "2026-11-04", "label": "Nov 4", "title": "Project Details", "kind": "due", "module": 7}, {"date": "2026-11-25", "label": "Nov 18", "title": "Project Assessment", "kind": "due", "module": 9}, {"date": "2026-12-02", "label": "Dec 2", "title": "Full proposal", "kind": "due", "module": 10}, {"date": "2026-12-07", "label": "Dec 7", "title": "Presentation slides", "kind": "due", "module": null}, {"date": "2026-12-9", "label": "Dec 9", "title": "Final proposal defense", "kind": "defense", "module": null}], "RESOURCES": {"Proposal": [{"label": "Overleaf template (CMSC 198.1)", "url": "https://www.overleaf.com/read/rftgnhrmrdnv#333d6d"}, {"label": "Compiled sample proposal (PDF)", "url": "./files/cmsc198-template-compiled.pdf"}, {"label": "Formatting guide: writing an abstract (GMU Writing Center)", "url": "https://writingcenter.gmu.edu/writing-resources/different-genres/writing-an-abstract"}], "Research": [{"label": "Google Scholar", "url": "https://scholar.google.com"}, {"label": "UP Cebu Library", "url": "https://www.upcebu.edu.ph/library/"}, {"label": "APA citation quick guide", "url": "https://apastyle.apa.org/style-grammar-guidelines/references"}], "System Design": [{"label": "Entity-relationship diagram basics", "url": "https://www.lucidchart.com/pages/er-diagrams"}, {"label": "C4 model for software architecture diagrams", "url": "https://c4model.com/"}], "Assessment": [{"label": "Nielsen Norman Group: usability testing 101", "url": "https://www.nngroup.com/articles/usability-testing-101/"}, {"label": "OWASP ZAP (required for web app security testing)", "url": "https://www.zaproxy.org/"}, {"label": "WebAIM: accessibility testing", "url": "https://webaim.org/articles/"}, {"label": "web.dev: performance testing basics", "url": "https://web.dev/learn/performance"}]}, "MODULES": [{"id": 1, "stage": "Stage 01", "title": "Choose a Problem", "section": "Introduction › Statement of the Problem", "why": "Every proposal starts with a real problem, not a technology idea looking for a use case. This stage helps you separate “I want to build an app” from “there is a specific problem, affecting specific people, that a computing solution could address.”", "produce": ["Two or three candidate problems, described independently of any solution.", "A short justification for the one you'll investigate further."], "think": ["Am I starting from a problem, or from a technology I already want to use?", "Could I explain this problem to someone outside CS without mentioning an app or system?"], "tryIt": {"type": "candidates", "count": 3, "fields": [{"key": "what", "label": "What is the problem?"}, {"key": "who", "label": "Who experiences it?"}, {"key": "where", "label": "Where does it occur?"}, {"key": "current", "label": "What happens currently?"}, {"key": "why", "label": "Why does it matter?"}]}, "selfCheck": ["I can describe the problem without naming a specific technology.", "Someone is clearly affected by the problem.", "I can identify evidence that the problem exists.", "The problem has a realistic computing component.", "The project appears feasible for the Special Problem sequence.", "I have written this section in my Overleaf proposal, in my own words, not just pasted my raw answers from this site."]}, {"id": 2, "stage": "Stage 02", "title": "Document the Problem", "section": "Introduction › Documentation of the Problem", "why": "A problem statement is only as strong as the evidence behind it. This stage is about collecting proof (data, reports, workflows, firsthand accounts) that the problem you chose is real and significant, not assumed.", "produce": ["An evidence table with at least three independent sources supporting your problem statement."], "think": ["Does this source directly support your description of the problem, or just something adjacent to it?", "Would a skeptical reader accept this as evidence, or would they ask for more?"], "tryIt": {"type": "evidence-table", "columns": [{"key": "source", "label": "Source"}, {"key": "type", "label": "Type"}, {"key": "demonstrates", "label": "What does it demonstrate?"}, {"key": "reference", "label": "Reference"}, {"key": "notes", "label": "Notes"}], "typeOptions": ["Academic literature", "Statistics", "Report", "Institutional documentation", "Process/workflow evidence", "User/client evidence", "Dataset", "Other"]}, "selfCheck": ["I have at least three independent sources.", "Each source directly supports my problem statement, not just a related topic.", "I can explain what each source demonstrates in one sentence.", "I have not treated a source as valid just because it was easy to find.", "I have written this section in my Overleaf proposal, in my own words, not just pasted my raw answers from this site."]}, {"id": 3, "stage": "Stage 03", "title": "Objectives & Scope", "section": "Introduction › Background and Objectives / Significance and Scope", "why": "This stage turns your problem into a direction: why the project exists, what it aims to do, who benefits, and, just as important, what it will deliberately leave out. A tight scope is what makes a Special Problem project finishable.", "produce": ["Background: the circumstances and need that led to the project.", "An overall objective and two or three specific objectives.", "Significance: who benefits and how.", "Scope: what's in, what's out, and why."], "think": ["If I removed my proposed technology, would this background still make sense?", "Does every specific objective trace back to the problem I documented?"], "tryIt": {"type": "objectives-scope"}, "selfCheck": ["My background explains the need without describing my solution yet.", "Each specific objective responds directly to the problem.", "I've named who benefits and how, specifically.", "My scope is realistic for one Special Problem sequence, not everything I could imagine building.", "I have written this section in my Overleaf proposal, in my own words, not just pasted my raw answers from this site."]}, {"id": 4, "stage": "Stage 04", "title": "Existing Alternatives", "section": "Review of Existing Alternatives › Existing Systems", "why": "Before proposing something new, you need to know what already exists. This isn't a formality. It's how you find out whether your idea is genuinely needed, and how you'll justify that later.", "produce": ["A comparison table of at least three existing systems addressing a similar problem."], "think": ["Am I comparing systems that genuinely compete for the same problem, or just anything vaguely related?", "What would a reader learn from this table that they couldn't guess on their own?"], "tryIt": {"type": "alt-table", "columns": [{"key": "system", "label": "System"}, {"key": "platform", "label": "Platform / License"}, {"key": "description", "label": "Description"}, {"key": "relation", "label": "Relation to Proposed System"}, {"key": "reference", "label": "Reference"}]}, "selfCheck": ["I have at least three relevant systems, not just the first three I found.", "Each entry names a real, specific relation to my proposed system, not just “similar.”", "I have a reference for every entry.", "I have written this section in my Overleaf proposal, in my own words, not just pasted my raw answers from this site."]}, {"id": 5, "stage": "Stage 05", "title": "Gap & Opportunity", "section": "Review of Existing Alternatives › Analysis of Alternatives / Gaps and Opportunities", "why": "A gap is not simply the absence of a system with exactly your proposed features. This stage asks you to step back from your comparison table and synthesize what it actually reveals, and to establish a meaningful opportunity, not just a technicality.", "produce": ["A short synthesis identifying what existing systems do well, what recurs as a limitation, and the opportunity your project addresses."], "think": ["If I described this gap to my adviser in two sentences, would it sound like a real opportunity or a stretch?", "Am I comparing my project against what's actually missing, or against a strawman version of the alternatives?"], "tryIt": {"type": "reflective", "fields": [{"key": "strengths", "label": "What do existing systems do well?"}, {"key": "limitations", "label": "What limitations recur across them?"}, {"key": "unmet", "label": "What needs remain unmet?"}, {"key": "opportunity", "label": "What opportunity does your proposed project address?"}, {"key": "relation", "label": "How does your proposed project relate to existing work?"}]}, "selfCheck": ["My gap is a meaningful opportunity, not just “no one has my exact combination of features.”", "I've identified patterns across the alternatives, not just repeated my table.", "The opportunity clearly connects back to the problem I documented in Stage 2.", "I have written this section in my Overleaf proposal, in my own words, not just pasted my raw answers from this site."]}, {"id": 6, "stage": "Stage 06", "title": "Proposed System", "section": "Project Details › Overview / Theoretical Framework / Technologies To Use", "why": "This is where your proposed system takes shape on paper: what it is, who it's for, what ideas or frameworks ground it, and what you'll build it with, and why.", "produce": ["An overview: purpose, intended users, problem addressed, expected benefits.", "The theories, models, or prior work that support your approach.", "A technology choice per layer, with your reasoning."], "think": ["Would a classmate understand what my system does from this overview alone, without seeing a screenshot?", "Am I choosing each technology for a reason, or because it's familiar?"], "tryIt": {"type": "proposed-system"}, "selfCheck": ["My overview names a purpose, users, and expected benefit, not just a feature list.", "I can justify each technology choice in one sentence.", "I've connected at least one theory, model, or prior study to my design approach.", "I have written this section in my Overleaf proposal, in my own words, not just pasted my raw answers from this site."]}, {"id": 7, "stage": "Stage 07", "title": "System Design", "section": "Project Details › System Design / System Architecture / System Features / Database Design", "why": "Design is where the proposal gets concrete: how the pieces fit together, what the system actually does, and how data is structured. You don't need a polished diagram yet. You need to know what belongs in one.", "produce": ["An architecture that identifies users, client, application, APIs/services, database, external systems, and data flows.", "A feature table with priorities.", "A first pass at your database entities and relationships."], "think": ["Have I distinguished the core system from features I'd only build if there were extra time?", "Could someone else draw my architecture diagram from what I've written here?"], "tryIt": {"type": "system-design"}, "selfCheck": ["I've identified every major architecture component, even in outline form.", "My features are labeled Essential, Important, or Optional, not all Essential.", "I have a first-pass entity list, even if the full ERD isn't finished yet.", "I have written this section in my Overleaf proposal, in my own words, not just pasted my raw answers from this site."]}, {"id": 8, "stage": "Stage 08", "title": "Implementation Plan", "section": "Project Details › Implementation Plan", "why": "A plan turns your proposal into something achievable in the time you actually have. This stage is about sequencing the work, not just listing tasks, but showing what depends on what.", "produce": ["A phase-by-phase implementation plan with start/end estimates and dependencies."], "think": ["Is this plan realistic for one semester of CMSC 198.2, or does it assume unlimited time?", "Which phases actually depend on a previous phase finishing first?"], "tryIt": {"type": "plan-table", "columns": [{"key": "phase", "label": "Phase"}, {"key": "activity", "label": "Activity"}, {"key": "start", "label": "Start"}, {"key": "end", "label": "End"}, {"key": "dependency", "label": "Dependency"}], "seedRows": [{"phase": "Planning", "activity": "", "start": "", "end": "", "dependency": ""}, {"phase": "Development", "activity": "", "start": "", "end": "", "dependency": ""}, {"phase": "Testing", "activity": "", "start": "", "end": "", "dependency": ""}, {"phase": "Finalization", "activity": "", "start": "", "end": "", "dependency": ""}]}, "selfCheck": ["Every phase has at least one concrete activity, not just a label.", "Dependencies are marked where one phase genuinely can't start before another finishes.", "The overall timeline fits realistically within CMSC 198.2.", "I have written this section in my Overleaf proposal, in my own words, not just pasted my raw answers from this site."]}, {"id": 9, "stage": "Stage 09", "title": "Project Assessment", "section": "Project Assessment › User Testing / Security Testing / Other Assessments", "why": "In CMSC 198.1 you're not running tests yet. You're planning how you will. A clear testing plan shows your adviser and panel that you've thought about how you'll know whether the system actually works.", "produce": ["A user testing plan: who, how many, what tasks, how you'll analyze and report results.", "A security testing plan (OWASP ZAP is required for web applications).", "Optionally, a plan for performance, compatibility, or accessibility testing."], "think": ["If I ran this testing plan exactly as written, would it actually tell me whether the system succeeded?", "Have I defined success in a way I could measure, not just “users like it”?"], "tryIt": {"type": "assessment"}, "selfCheck": ["My user testing plan names specific tasks, not just “test the system.”", "I've defined success criteria with a target, not just a vague goal.", "My security testing plan names OWASP ZAP if this is a web application.", "Optional assessments are clearly marked optional, not presented as required.", "I have written this section in my Overleaf proposal, in my own words, not just pasted my raw answers from this site."]}, {"id": 10, "stage": "Stage 10", "title": "Final Proposal", "section": "Whole proposal: front matter and main body", "why": "This stage is a structural check, not a content check. It helps you verify your Overleaf proposal actually contains everything the template requires before you submit the final proposal and defend it.", "produce": ["A complete Overleaf proposal document containing every required front-matter and main-body section."], "think": ["Have I opened my compiled PDF recently, or am I trusting that it's fine?", "Would a reader who skipped my earlier drafts still understand the whole proposal from this document alone?"], "tryIt": {"type": "final-checklist", "groups": [{"label": "Front Matter", "items": ["Title Page", "Permission Page", "Approval Page", "Acknowledgement", "Abstract", "Table of Contents", "List of Tables", "List of Figures"]}, {"label": "Main Body", "items": ["Introduction", "Review of Existing Alternatives", "Project Details", "Project Assessment", "References"]}]}, "selfCheck": ["Every front-matter and main-body item is present in my compiled PDF.", "I understand that checking every box here does not mean the proposal is academically complete. My adviser's review still matters.", "My Overleaf project is shared with my instructor.", "Every stage's thinking made it into this document as proper written prose, not leftover notes or bullet points from this site."]}], "MAPPING": [{"activity": "Candidate problem selection", "section": "Introduction › Statement of the Problem", "module": 1}, {"activity": "Evidence inventory", "section": "Introduction › Documentation of the Problem", "module": 2}, {"activity": "Objectives & scope worksheet", "section": "Introduction › Background, Objectives, Significance & Scope", "module": 3}, {"activity": "Alternative comparison table", "section": "Review of Existing Alternatives › Existing Systems", "module": 4}, {"activity": "Gap analysis", "section": "Review of Existing Alternatives › Gaps and Opportunities", "module": 5}, {"activity": "System overview & technology table", "section": "Project Details › Overview / Theoretical Framework / Technologies To Use", "module": 6}, {"activity": "Architecture, features & database notes", "section": "Project Details › System Design", "module": 7}, {"activity": "Implementation plan table", "section": "Project Details › Implementation Plan", "module": 8}, {"activity": "Testing plan", "section": "Project Assessment › User Testing / Security Testing", "module": 9}, {"activity": "Final structural checklist", "section": "Whole proposal", "module": 10}]}</script>
+<script id="app-js">(function(){
+"use strict";
+var DATA = JSON.parse(document.getElementById('app-data').textContent);
+var CONFIG = DATA.CONFIG, MILESTONES = DATA.MILESTONES, RESOURCES = DATA.RESOURCES, MODULES = DATA.MODULES, MAPPING = DATA.MAPPING;
+var NS = "cmsc1981";
+
+/* REPLACE: office/venue if you want something more specific */
+var INSTRUCTOR = {
+  name: "Dr. Ria Mae Borromeo",
+  email: "rhborromeo@up.edu.ph",
+  bookingUrl: "https://tidycal.com/rhborromeo/meeting-schedule",
+  office: "By appointment via TidyCal, or Google Hangouts if no slot fits."
+};
+
+/* ---------- storage ---------- */
+function lsGet(key, fallback){
+  try{ var v = localStorage.getItem(NS + "." + key); return v === null ? fallback : JSON.parse(v); }
+  catch(e){ return fallback; }
+}
+function lsSet(key, value){
+  try{ localStorage.setItem(NS + "." + key, JSON.stringify(value)); return true; }
+  catch(e){ return false; }
+}
+function getPath(obj, path){
+  var parts = path.split(".");
+  var cur = obj;
+  for(var i=0;i<parts.length;i++){
+    if(cur === undefined || cur === null) return undefined;
+    cur = cur[parts[i]];
+  }
+  return cur;
+}
+function setPath(obj, path, value){
+  var parts = path.split(".");
+  var cur = obj;
+  for(var i=0;i<parts.length-1;i++){
+    var p = parts[i];
+    var nextIsIndex = /^\d+$/.test(parts[i+1]);
+    if(cur[p] === undefined || cur[p] === null){ cur[p] = nextIsIndex ? [] : {}; }
+    cur = cur[p];
+  }
+  cur[parts[parts.length-1]] = value;
+}
+
+function getModuleData(id){ return lsGet("module." + id, {}); }
+function setModuleData(id, data){
+  lsSet("module." + id, data);
+  var prog = getProgress();
+  if(!prog[id] || prog[id] === "not-started"){
+    prog[id] = "in-progress";
+    setProgress(prog);
+  }
+}
+function getProgress(){ return lsGet("progress", {}); }
+function setProgress(p){ lsSet("progress", p); }
+function markComplete(id){
+  var prog = getProgress();
+  prog[id] = "completed";
+  setProgress(prog);
+  renderRoute();
+}
+function progressCount(){
+  var prog = getProgress(); var n = 0;
+  MODULES.forEach(function(m){ if(prog[m.id] === "completed") n++; });
+  return n;
+}
+function currentStageModule(){
+  var prog = getProgress();
+  for(var i=0;i<MODULES.length;i++){
+    if(prog[MODULES[i].id] !== "completed") return MODULES[i];
+  }
+  return MODULES[MODULES.length-1];
+}
+
+/* ---------- helpers ---------- */
+function esc(s){
+  if(s === undefined || s === null) return "";
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function fmtDate(iso){
+  var d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+}
+function daysUntil(iso){
+  var now = new Date(); now.setHours(0,0,0,0);
+  var d = new Date(iso + "T00:00:00");
+  return Math.round((d-now)/86400000);
+}
+function nextMilestone(){
+  var today = new Date().toISOString().slice(0,10);
+  for(var i=0;i<MILESTONES.length;i++){ if(MILESTONES[i].date >= today && MILESTONES[i].kind !== "start") return MILESTONES[i]; }
+  return null;
+}
+function statusLabel(s){
+  if(s === "completed") return "Completed";
+  if(s === "in-progress") return "In progress";
+  return "Not started";
+}
+
+/* ---------- router ---------- */
+var routes = {};
+function route(name, fn){ routes[name] = fn; }
+function renderRoute(){
+  var hash = location.hash.replace(/^#\//, "") || "home";
+  var parts = hash.split("/");
+  var main = document.getElementById('main');
+  var html = "";
+  if(parts[0] === "module" && parts[1]){
+    html = renderModule(parseInt(parts[1],10));
+    setActiveNav("journey");
+  } else if(routes[parts[0]]){
+    html = routes[parts[0]]();
+    setActiveNav(parts[0]);
+  } else {
+    html = routes.home();
+    setActiveNav("home");
+  }
+  main.innerHTML = html;
+  wireModuleInputs();
+  window.scrollTo(0,0);
+}
+function setActiveNav(name){
+  var links = document.querySelectorAll('.nav-links a');
+  links.forEach(function(a){ a.classList.toggle('active', a.dataset.route === name); });
+}
+window.addEventListener('hashchange', renderRoute);
+
+/* ================= HOME (course overview merged in) ================= */
+route('home', function(){
+  var outcomesHtml = CONFIG.outcomes.map(function(o,i){
+    return '<li><span class="n">' + String(i+1).padStart(2,'0') + '</span>' + esc(o) + '</li>';
+  }).join("");
+  var hasStarted = Object.keys(getProgress()).length > 0;
+  return (
+  '<div class="page">' +
+  '<header class="hero"><div class="wrap">' +
+    '<h1 class="hero-title">' + esc(CONFIG.title) + '</h1>' +
+    '<p class="hero-sub">' + esc(CONFIG.program) + ' · ' + esc(CONFIG.unit) + ', ' + esc(CONFIG.institution) + '</p>' +
+    '<p class="hero-meta">' + esc(CONFIG.semester) + ' · Aug 26 – Dec 10, 2026</p>' +
+  '</div></header>' +
+  '<section><div class="wrap">' +
+    '<p class="eyebrow">Overview</p>' +
+    '<h2 class="section-title">Course overview</h2>' +
+    '<p class="lede">This is CMSC 198.1, a 2-unit course where you\'ll identify a problem worth solving with a computing solution, review what already exists, and put together a scoped proposal for your capstone project. I treat this semester as the proposal stage: you\'re explaining what you plan to assess, not presenting results yet. You won\'t be implementing anything this term. By the end, I\'m expecting a proposal from you that becomes your starting point for CMSC 198.2, where you\'ll actually build, test, and defend the system.</p>' +
+  '</div></section>' +
+  '<section><div class="wrap">' +
+    '<p class="eyebrow">How to use this site</p>' +
+    '<h2 class="section-title">How to use this site</h2>' +
+    '<ul style="color:var(--ink-soft); font-size:14.5px; padding-left:20px; margin:0 0 24px;">' +
+      '<li style="margin-bottom:8px;">This site is your course guide and working space: requirements, schedule, proposal structure, activities, prompts, and self-checks all live here.</li>' +
+      '<li style="margin-bottom:8px;">Use the activities to develop your ideas and notes for each section. They\'re meant to help you figure out what belongs in the proposal, not to be the proposal itself.</li>' +
+      '<li style="margin-bottom:8px;">You write and maintain the actual proposal in Overleaf, in your own words, as proper academic prose.</li>' +
+      '<li style="margin-bottom:8px;">The Overleaf proposal is what I review and evaluate. Your notes here are not a submission and don\'t replace it.</li>' +
+      '<li style="margin-bottom:8px;">Feel free to share your notes from this site during consultations if they help explain your thinking, but you don\'t need to submit them separately.</li>' +
+    '</ul>' +
+    '<div style="max-width:420px; font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft); text-align:center; line-height:1.8;">' +
+      '<div style="font-weight:600; color:var(--maroon);">THIS SITE</div>' +
+      '<div>Requirements · Schedule · Activities · Notes · Self-checks</div>' +
+      '<div style="margin:6px 0; color:var(--line-strong);">↓</div>' +
+      '<div style="font-weight:600; color:var(--green);">OVERLEAF</div>' +
+      '<div>Actual proposal, written in your own words, revised throughout the semester</div>' +
+      '<div style="margin:6px 0; color:var(--line-strong);">↓</div>' +
+      '<div style="font-weight:600; color:var(--ink);">FINAL SUBMISSION</div>' +
+      '<div>Complete proposal, presentation, and defense</div>' +
+    '</div>' +
+  '</div></section>' +
+  '<section><div class="wrap">' +
+    '<p class="eyebrow">Outcomes</p>' +
+    '<h2 class="section-title">Learning outcomes</h2>' +
+    '<p class="lede">By the time we\'re done this semester, I expect you to be able to:</p>' +
+    '<ul class="outcome-list">' + outcomesHtml + '</ul>' +
+  '</div></section>' +
+  '<section><div class="wrap">' +
+    '<p class="eyebrow">Getting started</p>' +
+    '<h2 class="section-title">Set up your Overleaf project</h2>' +
+    '<p class="lede">Please do this as early in the semester as you can.</p>' +
+    '<ol style="color:var(--ink-soft); font-size:14.5px; padding-left:20px; margin:0 0 20px;">' +
+      '<li style="margin-bottom:8px;">Don\'t have an Overleaf account yet? <a href="https://www.overleaf.com/register" target="_blank" rel="noopener">Create one free</a>. New to LaTeX? Start with <a href="https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes" target="_blank" rel="noopener">Learn LaTeX in 30 minutes</a>.</li>' +
+      '<li style="margin-bottom:8px;">Open the <a href="' + esc(CONFIG.overleafTemplate) + '" target="_blank" rel="noopener">CMSC 198.1 proposal template</a>.</li>' +
+      '<li style="margin-bottom:8px;">Make your own copy: Menu → <strong>Copy Project</strong> (or "Open as Template" if prompted).</li>' +
+      '<li style="margin-bottom:8px;">Rename your copy, for example "CMSC198.1: [Your Name]".</li>' +
+      '<li style="margin-bottom:8px;">Share your project with me (Share → add ' + esc(INSTRUCTOR.email) + ' as Editor), then send me the Overleaf project link by email.</li>' +
+    '</ol>' +
+  '</div></section>' +
+  '<section style="border-bottom:none;"><div class="wrap">' +
+    '<p class="eyebrow">Ready?</p>' +
+    '<h2 class="section-title">' + (hasStarted ? 'Continue where you left off' : 'Let\'s get started') + '</h2>' +
+    '<div class="hero-actions">' +
+      (hasStarted ? '' : '<a class="btn btn-primary" href="#/module/1">Start Your Project</a>') +
+      '<a class="btn' + (hasStarted ? ' btn-primary' : '') + '" href="#/journey">View Your Project</a>' +
+    '</div>' +
+  '</div></section>' +
+  '</div>'
+  );
+});
+
+/* ================= SCHEDULE ================= */
+route('schedule', function(){
+  var today = new Date().toISOString().slice(0,10);
+  var rows = MILESTONES.map(function(m){
+    var past = m.date < today ? "past" : "";
+    var link = m.module ? '<a href="#/module/' + m.module + '">' + esc(m.title) + '</a>' : esc(m.title);
+    return '<tr class="' + past + '"><td class="date">' + esc(m.label) + '</td><td>' + link + (m.kind === 'due' ? ' <span class="badge">due</span>' : m.kind === 'defense' ? ' <span class="badge accent">defense</span>' : '') + '</td></tr>';
+  }).join("");
+  return (
+  '<div class="page">' +
+  '<header class="hero"><div class="wrap">' +
+    '<p class="hero-kicker">Schedule</p>' +
+    '<h1 class="hero-title">Course schedule</h1>' +
+    '<p class="hero-sub">No weekly synchronous class. Each milestone has a due date.</p>' +
+    '<p class="hero-sub">Each milestone refers to the corresponding section or sections of your Overleaf proposal. The activities on this site are preparation for completing those sections.</p>' +
+  '</div></header>' +
+  '<section><div class="wrap">' +
+    '<table class="milestones"><thead><tr><th>Date</th><th>Milestone</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+  '</div></section>' +
+  '</div>'
+  );
+});
+
+/* ================= JOURNEY (module list, expandable-style overview) ================= */
+route('journey', function(){
+  var prog = getProgress();
+  var done = progressCount();
+  var stagesHtml = MODULES.map(function(m){
+    var st = prog[m.id] || "not-started";
+    return '<div class="stage status-' + st + '">' +
+      '<a class="stage-link" href="#/module/' + m.id + '">' +
+        '<div class="stage-num">' + m.stage + ' · ' + esc(m.section) + '</div>' +
+        '<div class="stage-title">' + esc(m.title) + '</div>' +
+        '<div class="stage-status status-' + st + '">' + statusLabel(st) + '</div>' +
+      '</a></div>';
+  }).join("");
+  return (
+  '<div class="page">' +
+  '<header class="hero"><div class="wrap">' +
+    '<p class="hero-kicker">Your project</p>' +
+    '<h1 class="hero-title">Your Project</h1>' +
+    '<p class="hero-sub">Work through the activities below to develop your proposal.</p>' +
+    '<p class="progress-label" style="margin-top:20px;">' + done + ' / ' + MODULES.length + ' activities complete</p>' +
+    '<div class="progress-track"><div class="progress-fill" style="width:' + Math.round(done/MODULES.length*100) + '%"></div></div>' +
+  '</div></header>' +
+  '<section><div class="wrap"><div class="journey">' + stagesHtml + '</div></div></section>' +
+  '<section style="border-bottom:none;"><div class="wrap">' +
+    '<p class="eyebrow">Backup</p>' +
+    '<h2 class="section-title">Back up your work</h2>' +
+    '<p class="lede">Your answers autosave to this browser only, not to any server. Download a copy periodically, especially before clearing browser data or switching devices.</p>' +
+    '<div class="hero-actions">' +
+      '<button class="btn btn-primary" id="exportBtn">Download my work</button>' +
+    '</div>' +
+  '</div></section>' +
+  '</div>'
+  );
+});
+
+/* ================= RESOURCES ================= */
+route('resources', function(){
+  var groups = Object.keys(RESOURCES).map(function(cat){
+    var items = RESOURCES[cat].map(function(r){
+      return '<li><a href="' + esc(r.url) + '" target="_blank" rel="noopener">' + esc(r.label) + '</a></li>';
+    }).join("");
+    return '<div class="module-block" style="padding:24px 0;"><h3>' + esc(cat) + '</h3><ul style="margin:0; padding-left:18px; color:var(--ink-soft); font-size:14.5px;">' + items + '</ul></div>';
+  }).join("");
+  return (
+  '<div class="page">' +
+  '<header class="hero"><div class="wrap">' +
+    '<p class="hero-kicker">Resources</p>' +
+    '<h1 class="hero-title">Resources</h1>' +
+    '<p class="hero-sub">Everything referenced throughout the course, in one place.</p>' +
+  '</div></header>' +
+  '<section><div class="wrap">' + groups + '</div></section>' +
+  '</div>'
+  );
+});
+
+/* ================= PROPOSAL GUIDE ================= */
+route('proposal-guide', function(){
+  var mapRows = MAPPING.map(function(m){
+    return '<tr><td>' + esc(m.activity) + '</td><td>→ ' + esc(m.section) + '</td><td><a href="#/module/' + m.module + '">Open module</a></td></tr>';
+  }).join("");
+  return (
+  '<div class="page">' +
+  '<header class="hero"><div class="wrap">' +
+    '<p class="hero-kicker">Proposal guide</p>' +
+    '<h1 class="hero-title">Proposal guide</h1>' +
+    '<p class="hero-sub">The exact structure your Overleaf proposal follows, and how the activities on this site help you develop each section.</p>' +
+  '</div></header>' +
+  '<section><div class="wrap">' +
+    '<div class="module-block" style="padding:0 0 24px;"><h3>Introduction</h3><ul style="margin:0;padding-left:18px;color:var(--ink-soft);font-size:14.5px;"><li>Statement of the Problem</li><li>Documentation of the Problem</li><li>Background and Objectives of the Project</li><li>Significance and Scope of the Project</li></ul></div>' +
+    '<div class="module-block" style="padding:0 0 24px; border:none;"><h3>Review of Existing Alternatives</h3><ul style="margin:0;padding-left:18px;color:var(--ink-soft);font-size:14.5px;"><li>Existing Systems</li><li>Analysis of Alternatives</li><li>Gaps and Opportunities</li></ul></div>' +
+    '<div class="module-block" style="padding:0 0 24px; border:none;"><h3>Project Details</h3><ul style="margin:0;padding-left:18px;color:var(--ink-soft);font-size:14.5px;"><li>Overview</li><li>Theoretical Framework</li><li>Technologies To Use</li><li>System Design (Architecture, Features, Database Design)</li><li>Implementation Plan</li><li>Expected Outcomes</li><li>Limitations</li></ul></div>' +
+    '<div class="module-block" style="padding:0 0 24px; border:none;"><h3>Project Assessment</h3><ul style="margin:0;padding-left:18px;color:var(--ink-soft);font-size:14.5px;"><li>User Testing</li><li>Security Testing</li><li>Other Assessments (Optional)</li></ul></div>' +
+  '</div></section>' +
+  '<section><div class="wrap">' +
+    '<p class="eyebrow">Where does this go?</p>' +
+    '<h2 class="section-title">Activity → proposal section</h2>' +
+    '<div class="table-wrap"><table class="milestones"><thead><tr><th>Site activity</th><th>Proposal section</th><th></th></tr></thead><tbody>' + mapRows + '</tbody></table></div>' +
+  '</div></section>' +
+  '</div>'
+  );
+});
+
+/* ================= CONSULTATIONS ================= */
+route('consultations', function(){
+  return (
+  '<div class="page">' +
+  '<header class="hero"><div class="wrap">' +
+    '<h1 class="hero-title">Consultations</h1>' +
+    '<p class="hero-sub">If you have a question, concern, or decision about your project that you would like to discuss, you can book a synchronous online consultation.</p>' +
+    '<div class="hero-actions">' +
+      '<a class="btn btn-primary" href="' + esc(INSTRUCTOR.bookingUrl) + '" target="_blank" rel="noopener">Book a consultation →</a>' +
+    '</div>' +
+  '</div></header>' +
+  '<section style="border-bottom:none;"><div class="wrap">' +
+    '<p class="lede">If you cannot find a suitable schedule on the booking page, feel free to message me via Google Hangouts and we can discuss the concern there or arrange a time to talk.</p>' +
+    '<p class="lede">You do not need to wait for a scheduled consultation window. You can reach out whenever you need help.</p>' +
+    '<div class="contact-grid" style="margin-top:20px;">' +
+      '<div class="contact-item"><div class="k">Instructor</div><div class="v">' + esc(INSTRUCTOR.name) + '</div></div>' +
+      '<div class="contact-item"><div class="k">Email</div><div class="v">' + esc(INSTRUCTOR.email) + '</div></div>' +
+    '</div>' +
+  '</div></section>' +
+  '</div>'
+  );
+});
+
+
+/* ================= MODULE RENDERER ================= */
+var tableSchemas = {};
+
+function fld(moduleId, path, current, type, extra){
+  extra = extra || {};
+  var v = current === undefined || current === null ? "" : current;
+  if(type === "textarea"){
+    return '<textarea data-store="' + moduleId + '" data-path="' + esc(path) + '" placeholder="' + esc(extra.placeholder||'') + '">' + esc(v) + '</textarea>';
+  }
+  if(type === "text"){
+    return '<input type="text" data-store="' + moduleId + '" data-path="' + esc(path) + '" value="' + esc(v) + '" placeholder="' + esc(extra.placeholder||'') + '">';
+  }
+  if(type === "select"){
+    var opts = (extra.options||[]).map(function(o){ return '<option value="' + esc(o) + '"' + (v===o?' selected':'') + '>' + esc(o) + '</option>'; }).join("");
+    return '<select data-store="' + moduleId + '" data-path="' + esc(path) + '"><option value="">-</option>' + opts + '</select>';
+  }
+  return "";
+}
+
+function renderDynTable(moduleId, path, columns, data, seedRows){
+  tableSchemas[moduleId + "|" + path] = columns.map(function(c){return c.key;});
+  var rows = getPath(data, path);
+  if(!rows || rows.length === 0){
+    rows = (seedRows || [{}, {}, {}]).map(function(r){ return Object.assign({}, r); });
+    setPath(data, path, rows);
+    setModuleData(moduleId, data);
+  }
+  var head = columns.map(function(c){ return '<th>' + esc(c.label) + '</th>'; }).join("") + '<th></th>';
+  var body = rows.map(function(row, i){
+    var cells = columns.map(function(c){
+      var cellPath = path + "." + i + "." + c.key;
+      var el = c.type === "select" ? fld(moduleId, cellPath, row[c.key], "select", {options:c.options}) : fld(moduleId, cellPath, row[c.key], "text");
+      return '<td>' + el + '</td>';
+    }).join("");
+    return '<tr>' + cells + '<td class="row-actions"><button type="button" class="icon-btn" onclick="removeRow(' + moduleId + ',\'' + path + '\',' + i + ')" aria-label="Remove row">×</button></td></tr>';
+  }).join("");
+  return '<div class="table-wrap"><table class="dyn"><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table></div>' +
+    '<button type="button" class="add-btn" onclick="addRow(' + moduleId + ',\'' + path + '\')">+ Add row</button>';
+}
+
+function renderTryIt(m, data){
+  var t = m.tryIt;
+  if(t.type === "candidates"){
+    var blocks = "";
+    for(var c=0;c<t.count;c++){
+      var fields = t.fields.map(function(f){
+        var p = "candidates." + c + "." + f.key;
+        return '<div class="field-group"><label class="field-label">' + esc(f.label) + '</label>' + fld(m.id, p, getPath(data,p), "textarea") + '</div>';
+      }).join("");
+      blocks += '<div class="candidate-block"><h4>Candidate problem ' + (c+1) + '</h4>' + fields + '</div>';
+    }
+    var sel = getPath(data,"selected");
+    var radios = [];
+    for(var r=0;r<t.count;r++){
+      radios.push('<label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:8px;"><input type="radio" name="m' + m.id + 'sel" data-store="' + m.id + '" data-path="selected" value="' + r + '"' + (sel==String(r)?' checked':'') + '> Candidate problem ' + (r+1) + '</label>');
+    }
+    return blocks + '<div class="field-group"><label class="field-label">Which candidate will you investigate further?</label>' + radios.join("") + '</div>';
+  }
+  if(t.type === "evidence-table"){
+    return renderDynTable(m.id, "rows", t.columns.map(function(c){ return c.key==='type' ? {key:'type',label:'Type',type:'select',options:t.typeOptions} : c; }), data, [{},{},{}]);
+  }
+  if(t.type === "alt-table"){
+    return renderDynTable(m.id, "rows", t.columns, data, [{},{},{}]);
+  }
+  if(t.type === "reflective"){
+    return t.fields.map(function(f){
+      return '<div class="field-group"><label class="field-label">' + esc(f.label) + '</label>' + fld(m.id, f.key, getPath(data,f.key), "textarea") + '</div>';
+    }).join("");
+  }
+  if(t.type === "objectives-scope"){
+    var specific = getPath(data,"objectives.specific");
+    if(!specific || specific.length === 0){
+      specific = [""];
+      setPath(data,"objectives.specific",specific);
+      setModuleData(m.id, data);
+    }
+    var specHtml = specific.map(function(s,i){
+      return '<div class="repeatable-item">' + fld(m.id, "objectives.specific." + i, s, "text", {placeholder:"Specifically, it seeks to..."}) +
+        '<button type="button" class="icon-btn" onclick="removeItem(' + m.id + ',\'objectives.specific\',' + i + ')" aria-label="Remove">×</button></div>';
+    }).join("");
+    return (
+      '<h4 style="font-size:14px; margin:0 0 12px;">Background</h4>' +
+      '<div class="field-group"><label class="field-label">What circumstances led to the project?</label>' + fld(m.id,"background.circumstances",getPath(data,"background.circumstances"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">What need or limitation motivated it?</label>' + fld(m.id,"background.need",getPath(data,"background.need"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">Who identified the need?</label>' + fld(m.id,"background.who",getPath(data,"background.who"),"textarea") + '</div>' +
+      '<h4 style="font-size:14px; margin:24px 0 12px;">Objectives</h4>' +
+      '<div class="field-group"><label class="field-label">Overall objective: "This project aims to..."</label>' + fld(m.id,"objectives.overall",getPath(data,"objectives.overall"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">Specific objectives: "Specifically, it seeks to..."</label>' + specHtml + '<button type="button" class="add-btn" onclick="addItem(' + m.id + ',\'objectives.specific\')">+ Add specific objective</button></div>' +
+      '<h4 style="font-size:14px; margin:24px 0 12px;">Significance</h4>' +
+      '<div class="field-group"><label class="field-label">Who benefits?</label>' + fld(m.id,"significance.who",getPath(data,"significance.who"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">How, and why does this matter?</label>' + fld(m.id,"significance.how",getPath(data,"significance.how"),"textarea") + '</div>' +
+      '<h4 style="font-size:14px; margin:24px 0 12px;">Scope</h4>' +
+      '<div class="callout warning"><strong>Note:</strong> a project scope should help make the project feasible. Do not treat every possible future feature as part of the current project.</div>' +
+      '<div class="field-group"><label class="field-label">What will the project include?</label>' + fld(m.id,"scope.include",getPath(data,"scope.include"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">What will it not include?</label>' + fld(m.id,"scope.exclude",getPath(data,"scope.exclude"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">What constraints define the scope?</label>' + fld(m.id,"scope.constraints",getPath(data,"scope.constraints"),"textarea") + '</div>'
+    );
+  }
+  if(t.type === "proposed-system"){
+    return (
+      '<h4 style="font-size:14px; margin:0 0 12px;">Overview</h4>' +
+      '<div class="field-group"><label class="field-label">Purpose</label>' + fld(m.id,"overview.purpose",getPath(data,"overview.purpose"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">Intended users</label>' + fld(m.id,"overview.users",getPath(data,"overview.users"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">Problem addressed</label>' + fld(m.id,"overview.problem",getPath(data,"overview.problem"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">Expected benefits</label>' + fld(m.id,"overview.benefits",getPath(data,"overview.benefits"),"textarea") + '</div>' +
+      '<h4 style="font-size:14px; margin:24px 0 12px;">Theoretical framework</h4>' +
+      renderDynTable(m.id, "framework.rows", [{key:"theory",label:"Theory / model / prior study"},{key:"applies",label:"How it applies"}], data, [{}]) +
+      '<h4 style="font-size:14px; margin:24px 0 12px;">Technologies</h4>' +
+      renderDynTable(m.id, "technologies.rows", [{key:"layer",label:"Layer",type:"select",options:["Application","Database","Client","Other"]},{key:"technology",label:"Technology"},{key:"purpose",label:"Purpose"},{key:"reason",label:"Reason for choice"}], data, [{},{},{}])
+    );
+  }
+  if(t.type === "system-design"){
+    var archItems = ["Users","Client","Application","APIs / services","Database","External systems","Data flows"];
+    var archChecked = getPath(data,"architecture.checked") || [];
+    var archHtml = archItems.map(function(label,i){
+      return '<li><input type="checkbox" data-store="' + m.id + '" data-path="architecture.checked.' + i + '"' + (archChecked[i]?' checked':'') + '> I have identified my ' + esc(label.toLowerCase()) + '</li>';
+    }).join("");
+    return (
+      '<h4 style="font-size:14px; margin:0 0 12px;">System architecture</h4>' +
+      '<ul class="checklist">' + archHtml + '</ul>' +
+      '<div class="field-group" style="margin-top:16px;"><label class="field-label">Link to your architecture diagram (Drive, Overleaf figure, etc.; the site does not host it)</label>' + fld(m.id,"architecture.diagramLink",getPath(data,"architecture.diagramLink"),"text",{placeholder:"https://..."}) + '</div>' +
+      '<h4 style="font-size:14px; margin:24px 0 12px;">System features</h4>' +
+      renderDynTable(m.id, "features.rows", [{key:"feature",label:"Feature"},{key:"description",label:"Description"},{key:"user",label:"User"},{key:"priority",label:"Priority",type:"select",options:["Essential","Important","Optional"]}], data, [{},{},{}]) +
+      '<h4 style="font-size:14px; margin:24px 0 12px;">Database design</h4>' +
+      '<p class="desc" style="margin-bottom:12px;">Prepare the actual ERD externally and incorporate it into Overleaf. Use this table for a first pass at your entities.</p>' +
+      renderDynTable(m.id, "database.rows", [{key:"entity",label:"Entity"},{key:"attributes",label:"Attributes"},{key:"relationships",label:"Relationships"},{key:"pk",label:"Primary key"},{key:"fk",label:"Foreign key"}], data, [{},{}])
+    );
+  }
+  if(t.type === "plan-table"){
+    return renderDynTable(m.id, "rows", t.columns, data, t.seedRows);
+  }
+  if(t.type === "assessment"){
+    var otherItems = ["Performance testing","Compatibility testing","Accessibility testing","Other"];
+    var otherChecked = getPath(data,"other.checked") || [];
+    var otherHtml = otherItems.map(function(label,i){
+      return '<li><input type="checkbox" data-store="' + m.id + '" data-path="other.checked.' + i + '"' + (otherChecked[i]?' checked':'') + '> ' + esc(label) + '</li>';
+    }).join("");
+    return (
+      '<h4 style="font-size:14px; margin:0 0 12px;">User testing</h4>' +
+      '<div class="field-group"><label class="field-label">Target users, number of participants, and recruitment</label>' + fld(m.id,"userTesting.who",getPath(data,"userTesting.who"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">Tasks / scenarios and test specifications</label>' + fld(m.id,"userTesting.tasks",getPath(data,"userTesting.tasks"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">Bug/usability documentation and regression testing plan</label>' + fld(m.id,"userTesting.bugs",getPath(data,"userTesting.bugs"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">Analysis, reporting, and success criteria (e.g. target completion rate, error rate, satisfaction score)</label>' + fld(m.id,"userTesting.analysis",getPath(data,"userTesting.analysis"),"textarea") + '</div>' +
+      '<h4 style="font-size:14px; margin:24px 0 12px;">Security testing</h4>' +
+      '<div class="callout info"><strong>Required for web applications:</strong> use <a href="https://www.zaproxy.org/" target="_blank" rel="noopener">OWASP ZAP</a>, as stated in the proposal template.</div>' +
+      '<div class="field-group"><label class="field-label">Vulnerabilities to test for, and testing method</label>' + fld(m.id,"securityTesting.method",getPath(data,"securityTesting.method"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">Classification and mitigation plan</label>' + fld(m.id,"securityTesting.mitigation",getPath(data,"securityTesting.mitigation"),"textarea") + '</div>' +
+      '<div class="field-group"><label class="field-label">Retesting plan</label>' + fld(m.id,"securityTesting.retest",getPath(data,"securityTesting.retest"),"textarea") + '</div>' +
+      '<h4 style="font-size:14px; margin:24px 0 12px;">Other assessments <span style="font-weight:400; color:var(--ink-soft); text-transform:none; letter-spacing:0;">(Optional)</span></h4>' +
+      '<ul class="checklist">' + otherHtml + '</ul>' +
+      '<div class="field-group" style="margin-top:12px;">' + fld(m.id,"other.notes",getPath(data,"other.notes"),"textarea",{placeholder:"Details, if applicable..."}) + '</div>'
+    );
+  }
+  if(t.type === "final-checklist"){
+    return t.groups.map(function(g,gi){
+      var checked = getPath(data,"checked." + gi) || [];
+      var items = g.items.map(function(item,ii){
+        return '<li><input type="checkbox" data-store="' + m.id + '" data-path="checked.' + gi + '.' + ii + '"' + (checked[ii]?' checked':'') + '> ' + esc(item) + '</li>';
+      }).join("");
+      return '<div class="checklist-group-label">' + esc(g.label) + '</div><ul class="checklist">' + items + '</ul>';
+    }).join("") +
+    '<div class="callout warning" style="margin-top:20px;"><strong>Note:</strong> checking every box here does not certify that your proposal is academically complete. Your adviser\'s review still matters.</div>';
+  }
+  return "";
+}
+
+function renderModule(id){
+  var m = MODULES.filter(function(x){return x.id===id;})[0];
+  if(!m) return '<div class="page"><div class="wrap" style="padding:60px 0;"><p>Module not found.</p></div></div>';
+  var data = getModuleData(id);
+  var prog = getProgress();
+  var status = prog[id] || "not-started";
+
+  var produceHtml = m.produce.map(function(p){ return '<li>' + esc(p) + '</li>'; }).join("");
+  var thinkHtml = m.think.map(function(q,i){
+    return '<li>' + esc(q) + fld(m.id, "_think." + i, getPath(data,"_think." + i), "textarea", {placeholder:"Your notes..."}) + '</li>';
+  }).join("");
+  var selfCheckChecked = getPath(data,"_selfCheck") || [];
+  var selfCheckHtml = m.selfCheck.map(function(s,i){
+    return '<li><input type="checkbox" data-store="' + m.id + '" data-path="_selfCheck.' + i + '"' + (selfCheckChecked[i]?' checked':'') + '> ' + esc(s) + '</li>';
+  }).join("");
+
+  var warning = id === 1
+    ? '<div class="callout warning"><strong>Your responses are saved only in this browser.</strong> They are not uploaded to or stored on the course site. If you clear browser data, change browsers or devices, or use private browsing, your saved responses may not be available. Download a backup or save important work to your own files or Google Drive. Your final proposal belongs in your Overleaf project.</div>'
+    : '<p class="storage-note">Saved locally on this device</p>';
+
+  var idx = MODULES.map(function(x){return x.id;}).indexOf(id);
+  var prevM = idx > 0 ? MODULES[idx-1] : null;
+  var nextM = idx < MODULES.length-1 ? MODULES[idx+1] : null;
+
+  return (
+  '<div class="page">' +
+  '<div class="module-header"><div class="wrap">' +
+    '<p class="module-stage">' + esc(m.stage) + ' of ' + MODULES.length + '</p>' +
+    '<h1 class="module-title">' + esc(m.title) + '</h1>' +
+    '<p class="module-mapping">This activity → <strong>' + esc(m.section) + '</strong></p>' +
+  '</div></div>' +
+
+  '<div class="module-block"><div class="wrap"><h3>Why this matters</h3><p class="desc">' + esc(m.why) + '</p></div></div>' +
+
+  '<div class="module-block"><div class="wrap"><h3>What you need to produce</h3><ul style="margin:0; padding-left:18px; color:var(--ink-soft); font-size:14.5px;">' + produceHtml + '</ul></div></div>' +
+
+  '<div class="module-block"><div class="wrap"><h3>Think about it</h3><ul class="think-list">' + thinkHtml + '</ul></div></div>' +
+
+  '<div class="module-block"><div class="wrap"><h3>Try it</h3>' +
+    '<div class="callout info"><strong>These prompts are for thinking, not for pasting.</strong> They help you work out what belongs in this section. Once you\'re satisfied with your answers, write the actual section yourself, in proper prose, in your Overleaf proposal. This site does not submit anything on your behalf.</div>' +
+    warning + '<div style="margin-top:16px;">' + renderTryIt(m, data) + '</div></div></div>' +
+
+  '<div class="module-block"><div class="wrap"><h3>Check your work</h3><p class="desc">Before moving on, make sure you have worked through the activity and updated the corresponding section in your Overleaf proposal.</p><ul class="checklist">' + selfCheckHtml + '</ul>' +
+    '<button type="button" class="btn btn-primary" style="margin-top:16px;" onclick="markComplete(' + id + ')">I\'ve worked through this stage</button>' +
+    (status === "completed" ? ' <span class="badge accent" style="margin-left:8px;">Completed</span>' : '') +
+  '</div></div>' +
+
+  '<div class="module-block"><div class="wrap"><h3>Your proposal</h3><p class="desc">This site helps you think through and draft this section, but it is not your proposal. Before you mark this stage as worked through, write ' + esc(m.section) + ' yourself in your Overleaf document, in your own words. Your answers here are notes, not text to copy in as-is.</p></div></div>' +
+
+  '<div class="module-block" style="border-bottom:none;"><div class="wrap"><h3>Save your work</h3><p class="desc">Download a copy of your answers for this stage. This is a backup, not a submission.</p>' +
+    '<button type="button" class="btn" onclick="exportModule(' + id + ')">Download my answers</button></div></div>' +
+
+  '<div class="module-nav"><div class="wrap" style="display:flex; justify-content:space-between; width:100%;">' +
+    (prevM ? '<a class="btn" href="#/module/' + prevM.id + '">← ' + esc(prevM.title) + '</a>' : '<span></span>') +
+    (nextM ? '<a class="btn" href="#/module/' + nextM.id + '">' + esc(nextM.title) + ' →</a>' : '<a class="btn btn-primary" href="#/proposal-guide">Review proposal guide →</a>') +
+  '</div></div>' +
+  '</div>'
+  );
+}
+
+/* ================= dynamic row / item mutators (global for inline onclick) ================= */
+window.addRow = function(moduleId, path){
+  var data = getModuleData(moduleId);
+  var rows = getPath(data, path) || [];
+  var cols = tableSchemas[moduleId + "|" + path] || [];
+  var row = {}; cols.forEach(function(k){ row[k] = ""; });
+  rows.push(row);
+  setPath(data, path, rows);
+  setModuleData(moduleId, data);
+  renderRoute();
+};
+window.removeRow = function(moduleId, path, index){
+  var data = getModuleData(moduleId);
+  var rows = getPath(data, path) || [];
+  rows.splice(index, 1);
+  setPath(data, path, rows);
+  setModuleData(moduleId, data);
+  renderRoute();
+};
+window.addItem = function(moduleId, path){
+  var data = getModuleData(moduleId);
+  var arr = getPath(data, path) || [];
+  arr.push("");
+  setPath(data, path, arr);
+  setModuleData(moduleId, data);
+  renderRoute();
+};
+window.removeItem = function(moduleId, path, index){
+  var data = getModuleData(moduleId);
+  var arr = getPath(data, path) || [];
+  arr.splice(index, 1);
+  setPath(data, path, arr);
+  setModuleData(moduleId, data);
+  renderRoute();
+};
+window.markComplete = markComplete;
+
+/* ================= export / import ================= */
+function buildExportHtml(scopeModules){
+  var date = new Date().toISOString().slice(0,10);
+  var sections = scopeModules.map(function(m){
+    var data = getModuleData(m.id);
+    return '<h2>' + esc(m.stage) + ': ' + esc(m.title) + '</h2><pre style="white-space:pre-wrap; font-family:monospace; font-size:13px; background:#f6f4ee; padding:12px; border-radius:6px;">' + esc(JSON.stringify(data, null, 2)) + '</pre>';
+  }).join("\n");
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>CMSC 198.1 export</title></head><body style="font-family:sans-serif; max-width:800px; margin:40px auto;">' +
+    '<h1>CMSC 198.1: Special Problem 1</h1>' +
+    '<p><strong>Exported:</strong> ' + date + '</p>' +
+    '<p><em>This is a backup of your site answers, not your official proposal. Your proposal lives in Overleaf.</em></p>' +
+    sections + '</body></html>';
+}
+function downloadFile(filename, content, mime){
+  var blob = new Blob([content], {type: mime});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+window.exportModule = function(id){
+  var m = MODULES.filter(function(x){return x.id===id;})[0];
+  var date = new Date().toISOString().slice(0,10);
+  downloadFile("CMSC1981_Stage" + id + "_" + date + ".html", buildExportHtml([m]), "text/html");
+};
+function exportAll(){
+  var date = new Date().toISOString().slice(0,10);
+  downloadFile("CMSC1981_" + date + ".html", buildExportHtml(MODULES), "text/html");
+}
+
+/* ================= wiring ================= */
+function wireModuleInputs(){
+  var exportBtn = document.getElementById('exportBtn');
+  if(exportBtn){ exportBtn.addEventListener('click', exportAll); }
+}
+
+/* delegated input handling, attached once */
+function initDelegatedInputs(){
+  document.getElementById('main').addEventListener('input', handleFieldEvent);
+  document.getElementById('main').addEventListener('change', handleFieldEvent);
+}
+function handleFieldEvent(e){
+  var t = e.target;
+  if(!t.dataset || !t.dataset.store || t.dataset.path === undefined) return;
+  var moduleId = parseInt(t.dataset.store, 10);
+  var path = t.dataset.path;
+  var value = t.type === "checkbox" ? t.checked : t.value;
+  var data = getModuleData(moduleId);
+  setPath(data, path, value);
+  setModuleData(moduleId, data);
+}
+
+/* ================= mobile nav ================= */
+function initNavToggle(){
+  var toggle = document.getElementById('navToggle');
+  var links = document.getElementById('navLinks');
+  toggle.addEventListener('click', function(){
+    var open = links.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  links.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){ links.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); });
+  });
+}
+
+/* ================= init ================= */
+document.addEventListener('DOMContentLoaded', function(){
+  initNavToggle();
+  initDelegatedInputs();
+  renderRoute();
+});
+})();
+</script>
+</body>
+</html>
+
