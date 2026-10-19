@@ -254,7 +254,10 @@
       gap: 10px;
     }
 
-    .package-grid .choice { height: 100%; display: block; line-height: 1.45; }\n.package-grid .choice input { margin-right: 6px; }\n.package-grid small { display: inline-block; color: var(--muted); margin: 4px 0; font-size: 11px; }\n.package-grid strong { display: inline-block; margin-top: 5px; color: var(--navy); font-size: 12px; }
+    .package-grid .choice { height: 100%; display: block; line-height: 1.45; }
+    .package-grid .choice input { margin-right: 6px; }
+    .package-grid small { display: inline-block; color: var(--muted); margin: 4px 0; font-size: 11px; }
+    .package-grid strong { display: inline-block; margin-top: 5px; color: var(--navy); font-size: 12px; }
 
     .confirmation {
       display: flex;
@@ -270,11 +273,54 @@
       accent-color: var(--blue);
     }
 
-    .privacy-note {
-      color: var(--muted);
-      font-size: 12px;
-      margin: 12px 0 0 25px;
+    /* Short (first layer) privacy notice shown inside the form */
+    .notice-short {
+      margin: 0 0 18px;
+      padding: 14px 16px;
+      border: 1px solid #cfe3f1;
+      border-left: 4px solid var(--blue);
+      border-radius: 6px;
+      background: #f3f8fc;
+      color: #30384a;
+      font-size: 13px;
     }
+
+    .notice-short strong { color: var(--navy); }
+    .notice-short p { margin: 0; }
+    .notice-short a { color: var(--blue); font-weight: 700; }
+
+    /* Full (second layer) privacy notice shown below the form */
+    .notice-full {
+      margin-top: 22px;
+      background: var(--white);
+      border: 1px solid #e8edf2;
+      border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(17, 25, 79, .05);
+    }
+
+    .notice-full summary {
+      padding: 18px clamp(22px, 4vw, 40px);
+      color: var(--navy);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .notice-body {
+      padding: 0 clamp(22px, 4vw, 40px) clamp(22px, 4vw, 34px);
+      font-size: 14px;
+    }
+
+    .notice-body h2 {
+      margin: 22px 0 6px;
+      color: var(--navy);
+      font-size: 14px;
+    }
+
+    .notice-body h2:first-child { margin-top: 4px; }
+    .notice-body p { margin: 0 0 8px; }
+    .notice-body a { color: var(--blue); }
+    .notice-body .updated { margin-top: 20px; color: var(--muted); font-size: 12px; }
 
     .submit-row {
       margin-top: 28px;
@@ -355,14 +401,19 @@
         Please complete this form to tell us about your organization and the
         sponsorship or partnership opportunities you would like to explore.
       </p>
-      <!-- Replace # with the URL of the published sponsorship prospectus PDF. -->
+      <!-- Replace # with the URL of the published sponsorship prospectus PDF.
+           Note: the Sponsorship web page says the prospectus is sent after the EOI.
+           Decide whether to link it here publicly or send it after submission, and align both pages. -->
       <a class="prospectus-link" href="#" target="_blank" rel="noopener">
         View Sponsorship Prospectus
       </a>
     </section>
 
     <form class="form-card" action="#" method="post">
-      <!-- Connect the form to your chosen form service or backend before publishing. -->
+      <!-- Connect this form to Floq (the conference platform) before publishing.
+           Keep submissions inside Floq. Do not route them to email or spreadsheets,
+           because Annex 2 (VII.2) of the Host Agreement restricts manual transfers of shared data.
+           If Floq provides its own form builder, paste the short notice and full notice below into it. -->
 
       <fieldset>
         <legend><span class="section-number">01</span>Organization Information</legend>
@@ -380,6 +431,7 @@
               <option>Government Agency</option>
               <option>Private Sector / Corporate</option>
               <option>Educational Technology Provider</option>
+              <option>Media Organization</option>
               <option>Non-profit Organization</option>
               <option>Professional Association or Network</option>
               <option>Other</option>
@@ -433,6 +485,7 @@
             <label class="choice"><input type="checkbox" name="participation[]" value="Exhibition / Booth">Exhibition / booth</label>
             <label class="choice"><input type="checkbox" name="participation[]" value="In-kind sponsorship">In-kind sponsorship</label>
             <label class="choice"><input type="checkbox" name="participation[]" value="Institutional partnership">Institutional partnership</label>
+            <label class="choice"><input type="checkbox" name="participation[]" value="Media partnership">Media partnership or collaboration</label>
             <label class="choice"><input type="checkbox" name="participation[]" value="Specific conference activity">Sponsorship of a specific conference activity</label>
             <label class="choice"><input type="checkbox" name="participation[]" value="Other">Other</label>
           </div>
@@ -479,22 +532,30 @@
         <div class="field" style="margin-top: 22px;">
           <label for="additional-info">Additional information</label>
           <textarea id="additional-info" name="additional_info" placeholder="Tell us about your organization's interests, proposed support, or any questions you may have."></textarea>
+          <p class="help-text">Please do not include sensitive personal information or personal details of other individuals.</p>
         </div>
       </fieldset>
 
       <fieldset>
         <legend><span class="section-number">04</span>Confirmation</legend>
+
+        <!-- First layer: short privacy notice, shown before submission. -->
+        <div class="notice-short" role="note">
+          <p>
+            <strong>Privacy notice.</strong>
+            UPOU and ICDE, as joint controllers, will use the information you submit to respond to your inquiry
+            and to coordinate sponsorship or partnership arrangements, including ICDE's review of them.
+            This form is hosted on Floq, and your information may be processed outside the Philippines,
+            including in Norway. We do not sell your information. For questions or to exercise your rights,
+            contact <a href="mailto:dpo.upou@up.edu.ph">dpo.upou@up.edu.ph</a>.
+            <a href="#privacy-notice">Read the full Privacy Notice</a>.
+          </p>
+        </div>
+
         <label class="confirmation" for="confirmation">
           <input id="confirmation" name="confirmation" type="checkbox" value="confirmed" required>
           <span>I confirm that the information provided is accurate and that our organization is interested in exploring sponsorship or partnership opportunities with the 31st ICDE World Conference. <span class="required">*</span></span>
         </label>
-        <p class="privacy-note">
-          The information submitted will be used to respond to your inquiry and coordinate
-          potential conference sponsorship or partnership opportunities. Please read the
-          conference Privacy Notice for details on how your information will be handled.
-          <!-- Replace # with the URL of the approved conference Privacy Notice. -->
-          <a href="#">Privacy Notice</a>
-        </p>
       </fieldset>
 
       <div class="submit-row">
@@ -502,6 +563,90 @@
         <p class="submit-note">Thank you for your interest. The Conference Organizing Committee will follow up with you.</p>
       </div>
     </form>
+
+    <!-- Second layer: full privacy notice. Opens when the link above is clicked. -->
+    <details class="notice-full" id="privacy-notice">
+      <summary>Privacy Notice: Sponsorship and Partnership Expression of Interest</summary>
+      <div class="notice-body">
+
+        <h2>Who is responsible for your information</h2>
+        <p>
+          The University of the Philippines Open University (UPOU), as host, and the International Council for
+          Open and Distance Education (ICDE), as owner of the 31st ICDE World Conference, are joint personal
+          information controllers for the information you submit through this form, under a Data Sharing
+          Agreement. UPOU is your first point of contact. This notice covers this form only.
+        </p>
+
+        <h2>What we collect</h2>
+        <p>
+          Your organization's name, type, country, and website; the contact person's name, position, email
+          address, and optional phone number; and your stated interests, preferred package, and any text you add.
+        </p>
+
+        <h2>Why we collect it, and our legal basis</h2>
+        <p>
+          To respond to your inquiry, discuss and prepare sponsorship or partnership agreements, allow ICDE to
+          review them, and report on and audit sponsorships. We rely on our legitimate interests in organizing
+          the conference (Section 12(f) of RA 10173) and, once you ask to proceed, on steps taken at your request
+          before an agreement (Section 12(b)). We do not rely on your consent. We will not add you to newsletters
+          or mailing lists without asking you separately.
+        </p>
+
+        <h2>Who receives it</h2>
+        <p>
+          Conference Organizing Committee members who handle sponsorship and partnerships; UPOU offices that
+          support the conference, such as finance; ICDE (Oslo, Norway), to review and approve arrangements and for
+          reporting and audit; Floq, the platform provider that hosts this form; and government bodies or auditors
+          where required by law. We do not sell personal information.
+        </p>
+
+        <h2>Transfers outside the Philippines</h2>
+        <p>
+          Floq and ICDE may store or process your information outside the Philippines, including in Norway.
+          UPOU and ICDE must protect it under the Philippine Data Privacy Act and, where it applies, the
+          European Union's GDPR.
+        </p>
+
+        <h2>How long we keep it</h2>
+        <!-- CONFIRM the 90-day period with the Organizing Committee and Legal before publishing. -->
+        <p>
+          If your expression of interest does not lead to an agreement, we delete it within 90 days after the
+          conference ends. Records of executed agreements and related financial records are kept as required by
+          Commission on Audit rules and University records policies. ICDE must delete or return personal data it
+          receives from UPOU within 30 days after the data sharing arrangement ends. Any data files given to ICDE
+          for future conferences contain organization-level information only.
+        </p>
+
+        <h2>How we protect it</h2>
+        <p>
+          UPOU and ICDE apply organizational, physical, and technical safeguards consistent with the University of
+          the Philippines System Data Privacy Manual and the Data Sharing Agreement. If you give us personal
+          information about someone else, please make sure they know and have seen this notice.
+        </p>
+
+        <h2>Your rights</h2>
+        <p>
+          You may ask to access or correct your information, object to its processing, request its erasure or
+          blocking, claim damages for unlawful processing, and complain to the National Privacy Commission. Where
+          the GDPR applies, you may have further rights, including complaining to your local data protection
+          authority. UPOU and ICDE will coordinate their response to your request.
+        </p>
+
+        <h2>Contact us</h2>
+        <p>
+          Data Protection Officer, University of the Philippines Open University<br>
+          2/F UP Open University Main Building, Los Baños, Laguna 4031, Philippines<br>
+          Landline: (049) 536-6001 to 006, local 299<br>
+          Email: <a href="mailto:dpo.upou@up.edu.ph">dpo.upou@up.edu.ph</a>
+        </p>
+        <p>
+          ICDE: <a href="mailto:icde@icde.org">icde@icde.org</a>, Karl Johans gate 5, 0154 Oslo, Norway
+        </p>
+
+        <!-- Update this date on the day the page is published, and whenever the notice changes. -->
+        <p class="updated">Last updated: 19 October 2026</p>
+      </div>
+    </details>
   </main>
 
   <footer>
@@ -520,6 +665,13 @@
         form.querySelector('input[name="participation[]"]').focus();
       }
     });
+
+    // Open the full privacy notice when its link is clicked or the page loads with #privacy-notice.
+    const notice = document.getElementById("privacy-notice");
+    document.querySelectorAll('a[href="#privacy-notice"]').forEach(function (link) {
+      link.addEventListener("click", function () { notice.open = true; });
+    });
+    if (location.hash === "#privacy-notice") { notice.open = true; }
   </script>
 </body>
 </html>
