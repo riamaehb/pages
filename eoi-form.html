@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sponsorship & Partnership EOI | 31st ICDE World Conference 2027</title>
+  <style>
+    :root {
+      --navy: #11194f;
+      --blue: #176bb3;
+      --cyan: #12bfd3;
+      --text: #252b3a;
+      --muted: #687386;
+      --border: #dfe5ec;
+      --background: #f6f8fb;
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .site-header {
+      background: var(--white);
+      border-bottom: 1px solid #edf0f4;
+    }
+
+    .header-inner {
+      width: min(1100px, calc(100% - 40px));
+      margin: 0 auto;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      color: var(--navy);
+      font-weight: 700;
+      letter-spacing: .02em;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .brand span {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 18px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .nav a {
+      color: var(--navy);
+      text-decoration: none;
+    }
+
+    .nav a:hover { color: var(--blue); }
+
+    main {
+      width: min(900px, calc(100% - 32px));
+      margin: 42px auto 64px;
+    }
+
+    .intro {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      color: var(--navy);
+      font-size: clamp(27px, 4vw, 36px);
+      line-height: 1.2;
+      margin: 8px 0 10px;
+    }
+
+    .event-details {
+      color: var(--muted);
+      margin: 0 0 16px;
+      font-size: 14px;
+    }
+
+    .intro p {
+      max-width: 680px;
+      margin: 0 auto 16px;
+    }
+
+    .prospectus-link {
+      display: inline-block;
+      color: var(--blue);
+      font-weight: 700;
+      text-decoration: none;
+      border-bottom: 1px solid currentColor;
+    }
+
+    .form-card {
+      background: var(--white);
+      border: 1px solid #e8edf2;
+      border-radius: 12px;
+      padding: clamp(22px, 4vw, 40px);
+      box-shadow: 0 8px 28px rgba(17, 25, 79, .05);
+    }
+
+    fieldset {
+      border: 0;
+      padding: 0;
+      margin: 0;
+      min-width: 0;
+    }
+
+    fieldset + fieldset {
+      border-top: 1px solid #edf0f4;
+      margin-top: 30px;
+      padding-top: 28px;
+    }
+
+    legend {
+      width: 100%;
+      padding: 0;
+      margin-bottom: 18px;
+      color: var(--navy);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .section-number {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: #eaf9fc;
+      color: var(--blue);
+      font-size: 12px;
+      vertical-align: 2px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px 20px;
+    }
+
+    .field { min-width: 0; }
+    .field.full-width { grid-column: 1 / -1; }
+
+    label, .field-label {
+      display: block;
+      margin-bottom: 7px;
+      color: #30384a;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .required { color: #c03948; }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="url"],
+    select,
+    textarea {
+      display: block;
+      width: 100%;
+      border: 1px solid #cfd7e2;
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      padding: 11px 12px;
+      font: inherit;
+      font-size: 14px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    input, select { min-height: 44px; }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(23, 107, 179, .12);
+    }
+
+    textarea {
+      min-height: 115px;
+      resize: vertical;
+    }
+
+    .help-text {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 16px;
+    }
+
+    .choice {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 10px 12px;
+      margin: 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 400;
+      cursor: pointer;
+    }
+
+    .choice:hover { border-color: #9bcbd9; }
+
+    .choice input {
+      min-height: auto;
+      margin: 3px 0 0;
+      accent-color: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    .package-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .package-grid .choice { height: 100%; display: block; line-height: 1.45; }\n.package-grid .choice input { margin-right: 6px; }\n.package-grid small { display: inline-block; color: var(--muted); margin: 4px 0; font-size: 11px; }\n.package-grid strong { display: inline-block; margin-top: 5px; color: var(--navy); font-size: 12px; }
+
+    .confirmation {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .confirmation input {
+      min-height: auto;
+      margin-top: 4px;
+      accent-color: var(--blue);
+    }
+
+    .privacy-note {
+      color: var(--muted);
+      font-size: 12px;
+      margin: 12px 0 0 25px;
+    }
+
+    .submit-row {
+      margin-top: 28px;
+      text-align: center;
+    }
+
+    button[type="submit"] {
+      width: min(100%, 360px);
+      border: 0;
+      border-radius: 6px;
+      padding: 15px 24px;
+      color: #fff;
+      background: linear-gradient(100deg, var(--navy), var(--blue), var(--cyan));
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      cursor: pointer;
+    }
+
+    button[type="submit"]:hover { filter: brightness(1.06); }
+
+    .submit-note {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    footer {
+      padding: 22px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .header-inner {
+        width: calc(100% - 28px);
+        padding: 14px 0;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .nav { justify-content: flex-start; gap: 10px 14px; }
+      main { margin-top: 28px; }
+      .field-grid, .choice-grid { grid-template-columns: 1fr; }
+      .package-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .field.full-width { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#" aria-label="31st ICDE World Conference home">
+        31st ICDE WORLD CONFERENCE
+        <span>Reimagining Education for a Sustainable Future</span>
+      </a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#">Home</a>
+        <a href="#">Program</a>
+        <a href="#">Call for Papers</a>
+        <a href="#">Registration</a>
+        <a href="#">Venue</a>
+        <a href="#">Sponsorship</a>
+        <a href="#">About Us</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div class="eyebrow">31st ICDE World Conference</div>
+      <h1 id="page-title">Sponsorship &amp; Partnership</h1>
+      <p class="event-details">15–19 November 2027 · Cebu, Philippines</p>
+      <p>
+        Thank you for your interest in supporting the 31st ICDE World Conference.
+        Please complete this form to tell us about your organization and the
+        sponsorship or partnership opportunities you would like to explore.
+      </p>
+      <!-- Replace # with the URL of the published sponsorship prospectus PDF. -->
+      <a class="prospectus-link" href="#" target="_blank" rel="noopener">
+        View Sponsorship Prospectus
+      </a>
+    </section>
+
+    <form class="form-card" action="#" method="post">
+      <!-- Connect the form to your chosen form service or backend before publishing. -->
+
+      <fieldset>
+        <legend><span class="section-number">01</span>Organization Information</legend>
+        <div class="field-grid">
+          <div class="field">
+            <label for="organization">Organization name <span class="required">*</span></label>
+            <input id="organization" name="organization" type="text" autocomplete="organization" required>
+          </div>
+
+          <div class="field">
+            <label for="organization-type">Organization type <span class="required">*</span></label>
+            <select id="organization-type" name="organization_type" required>
+              <option value="">Select an organization type</option>
+              <option>Higher Education Institution</option>
+              <option>Government Agency</option>
+              <option>Private Sector / Corporate</option>
+              <option>Educational Technology Provider</option>
+              <option>Non-profit Organization</option>
+              <option>Professional Association or Network</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="country">Country <span class="required">*</span></label>
+            <input id="country" name="country" type="text" autocomplete="country-name" required>
+          </div>
+
+          <div class="field">
+            <label for="website">Organization website</label>
+            <input id="website" name="website" type="url" placeholder="https://example.org" autocomplete="url">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="section-number">02</span>Contact Person</legend>
+        <div class="field-grid">
+          <div class="field">
+            <label for="full-name">Full name <span class="required">*</span></label>
+            <input id="full-name" name="full_name" type="text" autocomplete="name" required>
+          </div>
+
+          <div class="field">
+            <label for="position">Position / designation <span class="required">*</span></label>
+            <input id="position" name="position" type="text" autocomplete="organization-title" required>
+          </div>
+
+          <div class="field">
+            <label for="email">Email address <span class="required">*</span></label>
+            <input id="email" name="email" type="email" autocomplete="email" required>
+          </div>
+
+          <div class="field">
+            <label for="phone">Contact number</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="section-number">03</span>Expression of Interest</legend>
+
+        <div class="field">
+          <span class="field-label">How would your organization like to participate? <span class="required">*</span></span>
+          <div class="choice-grid">
+            <label class="choice"><input type="checkbox" name="participation[]" value="Financial sponsorship">Financial sponsorship</label>
+            <label class="choice"><input type="checkbox" name="participation[]" value="Exhibition / Booth">Exhibition / booth</label>
+            <label class="choice"><input type="checkbox" name="participation[]" value="In-kind sponsorship">In-kind sponsorship</label>
+            <label class="choice"><input type="checkbox" name="participation[]" value="Institutional partnership">Institutional partnership</label>
+            <label class="choice"><input type="checkbox" name="participation[]" value="Specific conference activity">Sponsorship of a specific conference activity</label>
+            <label class="choice"><input type="checkbox" name="participation[]" value="Other">Other</label>
+          </div>
+          <p class="help-text">Select all that apply. Please select at least one option.</p>
+        </div>
+
+        <div class="field" style="margin-top: 22px;">
+          <span class="field-label">Preferred sponsorship package</span>
+          <div class="package-grid">
+            <label class="choice"><input type="radio" name="package" value="Sinulog">Sinulog<br><small>The Host Presenting Partnership Tier</small><br><strong>PhP 2,000,000 / USD 32,500</strong></label>
+            <label class="choice"><input type="radio" name="package" value="Dinagyang">Dinagyang<br><small>The Grand Networking &amp; Hospitality Partner/s Tier</small><br><strong>PhP 1,250,000 / USD 20,300</strong></label>
+            <label class="choice"><input type="radio" name="package" value="Panagbenga">Panagbenga<br><small>The Welcome &amp; Tech-Power Partners</small><br><strong>PhP 800,000 / USD 13,000</strong></label>
+            <label class="choice"><input type="radio" name="package" value="Masskara">Masskara<br><small>The Everyday Engagement Partners Tier</small><br><strong>PhP 500,000 / USD 8,100</strong></label>
+            <label class="choice"><input type="radio" name="package" value="Pahiyas Exhibition Pavilion">Pahiyas Exhibition Pavilion<br><small>Exhibition Booths Tier</small><br><strong>USD 2,600</strong></label>
+            <label class="choice"><input type="radio" name="package" value="Undecided">Not sure yet</label>
+            <label class="choice"><input type="radio" name="package" value="Other / custom">Other / custom arrangement</label>
+          </div>
+          <p class="help-text">Package names and prices follow the sponsorship prospectus. Please contact the committee if you need clarification on a package.</p>
+        </div>
+
+        <div class="field" style="margin-top: 22px;">
+          <span class="field-label">Areas of interest</span>
+          <div class="choice-grid">
+            <label class="choice"><input type="checkbox" name="areas[]" value="Inclusive and accessible education">Inclusive and accessible education</label>
+            <label class="choice"><input type="checkbox" name="areas[]" value="Educational technology and digital transformation">Educational technology and digital transformation</label>
+            <label class="choice"><input type="checkbox" name="areas[]" value="Open and distance learning">Open and distance learning</label>
+            <label class="choice"><input type="checkbox" name="areas[]" value="Education for sustainability">Education for sustainability</label>
+            <label class="choice"><input type="checkbox" name="areas[]" value="Conference activities and networking">Conference activities and networking</label>
+            <label class="choice"><input type="checkbox" name="areas[]" value="Other">Other</label>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top: 22px;">
+          <label for="support-type">Expected form of support</label>
+          <select id="support-type" name="support_type">
+            <option value="">Select an option (optional)</option>
+            <option>Financial contribution</option>
+            <option>In-kind contribution</option>
+            <option>Financial and in-kind contribution</option>
+            <option>To be determined</option>
+          </select>
+        </div>
+
+        <div class="field" style="margin-top: 22px;">
+          <label for="additional-info">Additional information</label>
+          <textarea id="additional-info" name="additional_info" placeholder="Tell us about your organization's interests, proposed support, or any questions you may have."></textarea>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend><span class="section-number">04</span>Confirmation</legend>
+        <label class="confirmation" for="confirmation">
+          <input id="confirmation" name="confirmation" type="checkbox" value="confirmed" required>
+          <span>I confirm that the information provided is accurate and that our organization is interested in exploring sponsorship or partnership opportunities with the 31st ICDE World Conference. <span class="required">*</span></span>
+        </label>
+        <p class="privacy-note">
+          The information submitted will be used to respond to your inquiry and coordinate
+          potential conference sponsorship or partnership opportunities. Please read the
+          conference Privacy Notice for details on how your information will be handled.
+          <!-- Replace # with the URL of the approved conference Privacy Notice. -->
+          <a href="#">Privacy Notice</a>
+        </p>
+      </fieldset>
+
+      <div class="submit-row">
+        <button type="submit">SUBMIT EXPRESSION OF INTEREST</button>
+        <p class="submit-note">Thank you for your interest. The Conference Organizing Committee will follow up with you.</p>
+      </div>
+    </form>
+  </main>
+
+  <footer>
+    31st ICDE World Conference 2027 · Cebu, Philippines
+  </footer>
+
+  <script>
+    // Client-side check that at least one participation option is selected.
+    // Server-side validation is also required when the form is connected.
+    const form = document.querySelector("form");
+    form.addEventListener("submit", function (event) {
+      const selected = form.querySelectorAll('input[name="participation[]"]:checked');
+      if (selected.length === 0) {
+        event.preventDefault();
+        alert("Please select at least one participation option.");
+        form.querySelector('input[name="participation[]"]').focus();
+      }
+    });
+  </script>
+</body>
+</html>
