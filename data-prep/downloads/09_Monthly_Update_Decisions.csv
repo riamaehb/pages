@@ -1,0 +1,9 @@
+﻿Source,Row,Applicant_ID,Decision,Reason
+New_Registrations,2,APP-0101,New - append,New unique applicant
+New_Registrations,3,APP-0102,New - append,Standardize barangay to Concepcion Grande
+New_Registrations,4,APP-0103,New - append,New unique applicant
+New_Registrations,5,APP-0104,New - append,New unique applicant
+New_Registrations,6,APP-0105,New - append,New unique applicant
+New_Registrations,7,APP-0103,Duplicate - exclude,Exact duplicate of earlier APP-0103 row
+Status_Updates,2,APP-0063,Update existing,Pending to Placed; do not create a new applicant
+Status_Updates,3,APP-0066,Update existing,Pending to Placed; do not create a new applicant
