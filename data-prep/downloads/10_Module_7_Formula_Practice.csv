@@ -1,0 +1,13 @@
+Applicant_ID,Barangay,Sector,Status,Days_To_Placement
+APP-0001,Concepcion Grande,Youth,Placed,30
+APP-0002,Pacol,Adult,Pending,0
+APP-0003,Concepcion Grande,Adult,Placed,15
+APP-0004,Cararayan,Youth,Withdrawn,0
+APP-0005,Pacol,Youth,Placed,40
+APP-0006,Concepcion Grande,Youth,Pending,0
+APP-0007,Cararayan,Adult,Placed,25
+APP-0008,Pacol,Adult,Placed,10
+APP-0009,Concepcion Grande,Adult,Withdrawn,0
+APP-0010,Cararayan,Youth,Placed,20
+APP-0011,Pacol,Youth,Pending,0
+APP-0012,Concepcion Grande,Youth,Placed,35

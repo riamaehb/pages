@@ -1,0 +1,21 @@
+﻿Beneficiary_ID,Barangay_After_Rule_Check,Service_Status,Hours_Completed,Registered,Completed_Flag
+BEN-001,Pacol,Completed,20,1,1
+BEN-002,Concepcion Grande,Completed,20,1,1
+BEN-003,Cararayan,Completed,20,1,1
+BEN-004,Mabolo,Completed,20,1,1
+BEN-005,Peñafrancia,Completed,20,1,1
+BEN-006,Pacol,Completed,20,1,1
+BEN-007,Concepcion Grande,Completed,20,1,1
+BEN-008,Cararayan,Completed,20,1,1
+BEN-009,Mabolo,Completed,20,1,1
+BEN-010,[REVIEW REQUIRED],Completed,20,1,1
+BEN-011,Pacol,Completed,20,1,1
+BEN-012,Concepcion Grande,Completed,20,1,1
+BEN-013,Cararayan,Completed,20,1,1
+BEN-014,Mabolo,Completed,20,1,1
+BEN-015,Peñafrancia,Completed,20,1,1
+BEN-016,Pacol,Completed,20,1,1
+BEN-017,Concepcion Grande,Ongoing,8,1,0
+BEN-018,Cararayan,Ongoing,8,1,0
+BEN-019,Mabolo,Ongoing,8,1,0
+BEN-020,Peñafrancia,Withdrawn,,1,0
