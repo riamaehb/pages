@@ -49,3 +49,7 @@ Changed display name to Ria Borromeo in AI Declaration and Contact, and invited 
 
 ## Version 23: Display name
 Updated AI Declaration and Contact display name to Ria Borromeo. No changes to website behavior or progress storage.
+
+
+## Version 24: Module 10 and the data lifecycle
+Added Sections G and H to connect current spreadsheet reporting practices with better data collection at the source, vendor-neutral systems requirements, and a practical immediate/long-term improvement reflection. Existing modules, downloadable resources, navigation, quiz, and progress keys unchanged.
