@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Tenant Onboarding</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Tenant Onboarding</h1>
+    <p><span id="address"></span><span id="unit-label"></span></p>
+  </header>
+
+  <ol class="steps" id="steps" hidden>
+    <li>Profile and ID</li><li>Review</li><li>House Rules</li><li>Contract</li><li>Done</li>
+  </ol>
+
+  <section id="v-loading" class="card"><p class="muted"><span class="spinner"></span>Loading…</p></section>
+
+  <section id="v-error" class="card" hidden>
+    <h2>Link not available</h2>
+    <p id="error-text"></p>
+    <div class="actions"><button class="btn secondary" type="button" onclick="load()">Try again</button></div>
+  </section>
+
+  <!-- Step 1: Profile and ID -->
+  <section id="v-profile" hidden>
+    <div class="card notice" id="resubmit-box" hidden>
+      <b>The lessor asked you to update your submission:</b>
+      <p id="resubmit-text" style="margin:6px 0 0"></p>
+    </div>
+    <form id="profile-form" class="card" novalidate>
+      <h2>Your profile</h2>
+      <div class="privacy" id="privacy"></div>
+      <p class="muted" style="margin-top:0">Email on file: <b id="email"></b></p>
+
+      <div class="grid">
+        <label class="f full">Full legal name <span class="opt">(as shown on your ID)</span>
+          <input type="text" name="FullName" required maxlength="120" autocomplete="name"></label>
+        <label class="f">Nationality
+          <input type="text" name="Nationality" required maxlength="60" value="Filipino"></label>
+        <label class="f">Mobile number
+          <input type="tel" name="Mobile" required maxlength="20" placeholder="09XX XXX XXXX" autocomplete="tel"></label>
+        <label class="f full">Permanent or provincial address
+          <input type="text" name="PermanentAddress" required maxlength="300" autocomplete="street-address">
+          <div class="hint">This address appears in the Contract of Lease.</div></label>
+        <label class="f">Occupation
+          <input type="text" name="Occupation" required maxlength="100"></label>
+        <label class="f">Employer or school <span class="opt">(optional)</span>
+          <input type="text" name="EmployerOrSchool" maxlength="150"></label>
+        <label class="f">Number of occupants <span class="opt">(including you)</span>
+          <input type="number" name="OccupantsCount" required min="1" max="10" value="1" inputmode="numeric"></label>
+        <label class="f full">Names of other occupants <span class="opt">(if any)</span>
+          <textarea name="OtherOccupants" maxlength="500" placeholder="One name per line"></textarea></label>
+      </div>
+
+      <h3>Emergency contact</h3>
+      <div class="grid">
+        <label class="f">Name
+          <input type="text" name="EmergencyName" required maxlength="120"></label>
+        <label class="f">Relationship
+          <input type="text" name="EmergencyRelationship" required maxlength="60" placeholder="e.g., Mother"></label>
+        <label class="f">Mobile number
+          <input type="tel" name="EmergencyMobile" required maxlength="20"></label>
+      </div>
+
+      <h3>Valid ID</h3>
+      <div class="grid">
+        <label class="f">ID type
+          <select name="IDType" required><option value="">Choose…</option></select></label>
+        <label class="f">Expiry date <span class="opt">(leave blank if none)</span>
+          <input type="date" name="IDExpiry"></label>
+        <label class="f full">Photo or scan of the ID
+          <input type="file" name="IDFile" accept="image/jpeg,image/png,application/pdf" style="margin-top:6px">
+          <div class="hint" id="id-hint"></div></label>
+      </div>
+
+      <label class="check"><input type="checkbox" name="LegalAgeConfirmed"> <span>I am at least 18 years old.</span></label>
+      <label class="check"><input type="checkbox" name="Consent"> <span>I have read the privacy notice above and consent to the processing of my information for these purposes.</span></label>
+
+      <div class="actions"><button class="btn" type="submit">Submit for review</button></div>
+      <div class="msg" data-msg hidden></div>
+    </form>
+  </section>
+
+  <!-- Step 2: Waiting for review -->
+  <section id="v-review" class="card" hidden>
+    <h2>Submitted for review</h2>
+    <p>Thank you. The lessor will review your details and valid ID. You will receive an email when you can continue to the House Rules and Contract of Lease, using this same link.</p>
+  </section>
+
+  <!-- Step 3: House Rules -->
+  <section id="v-rules" hidden>
+    <div class="card"><h2>House Rules</h2>
+      <p class="muted" style="margin:0">Please read the House Rules and Utility Billing Policy in full. They form part of your Contract of Lease.</p></div>
+    <div class="docview" id="rules-doc"></div>
+    <form id="rules-form" class="card" novalidate>
+      <label class="check"><input type="checkbox" name="agree"> <span>I have read and understood the House Rules and Utility Billing Policy and agree to be bound by them.</span></label>
+      <label class="f">Type your full name to confirm
+        <input type="text" name="typedName" maxlength="120" autocomplete="off">
+        <div class="hint">Exactly as in your profile: <b class="js-fullname"></b></div></label>
+      <div class="actions"><button class="btn" type="submit">Accept House Rules</button></div>
+      <div class="msg" data-msg hidden></div>
+    </form>
+  </section>
+
+  <!-- Step 4: Contract -->
+  <section id="v-contract" hidden>
+    <div class="card"><h2>Contract of Lease</h2>
+      <p class="muted" style="margin:0">Please review the contract below. Signing it also signs the acknowledgement in the House Rules you just accepted.</p></div>
+    <div class="docview" id="contract-doc"></div>
+    <form id="sign-form" class="card" novalidate>
+      <h2>Sign electronically</h2>
+      <label class="f">Draw your signature</label>
+      <div class="sigbox"><canvas id="sig"></canvas><div class="ph" id="sig-ph">Sign here with your finger or mouse</div></div>
+      <div class="actions" style="margin-top:6px"><button type="button" class="link" id="sig-clear">Clear signature</button></div>
+      <label class="f" style="margin-top:12px">Type your full name
+        <input type="text" name="typedName" maxlength="120" autocomplete="off">
+        <div class="hint">Exactly as in your profile: <b class="js-fullname"></b></div></label>
+      <label class="check"><input type="checkbox" name="agree"> <span>I agree to sign this Contract of Lease and the House Rules acknowledgement electronically, and I understand that my electronic signature is as binding as a handwritten one.</span></label>
+      <div class="actions"><button class="btn" type="submit">Sign contract</button></div>
+      <div class="msg" data-msg hidden></div>
+    </form>
+  </section>
+
+  <section id="v-signed" class="card" hidden>
+    <div class="done-icon">✓</div>
+    <h2>Signed</h2>
+    <p>Your signature has been recorded. Once the lessor countersigns, the fully signed Contract of Lease and House Rules will be emailed to <b class="js-email"></b>.</p>
+  </section>
+
+  <section id="v-complete" class="card" hidden>
+    <div class="done-icon">✓</div>
+    <h2>All done</h2>
+    <p>Your Contract of Lease has been signed by both parties. A PDF copy was emailed to <b class="js-email"></b>. Please keep it for your records.</p>
+  </section>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/common.js"></script>
+<script>
+  var VIEWS = ['v-loading', 'v-error', 'v-profile', 'v-review', 'v-rules', 'v-contract', 'v-signed', 'v-complete'];
+  var STEP_OF = { INVITED: 0, NEEDS_RESUBMISSION: 0, SUBMITTED: 1, APPROVED: 2, RULES_ACCEPTED: 3, TENANT_SIGNED: 4, COMPLETED: 5 };
+  var PROFILE_KEYS = ['FullName', 'Nationality', 'Mobile', 'PermanentAddress', 'Occupation', 'EmployerOrSchool',
+    'OccupantsCount', 'OtherOccupants', 'EmergencyName', 'EmergencyRelationship', 'EmergencyMobile', 'IDType', 'IDExpiry'];
+  var TOKEN = hashParam('t');
+  var state = null, pad = null, idTypesLoaded = false;
+
+  function show(id) { showView(VIEWS, id); }
+  function setSteps(status) {
+    var cur = STEP_OF[status], lis = $('steps').querySelectorAll('li');
+    for (var i = 0; i < lis.length; i++) lis[i].className = i < cur ? 'done' : (i === cur ? 'current' : '');
+    $('steps').hidden = false;
+  }
+  function showError(text) { $('steps').hidden = true; $('error-text').textContent = text; show('v-error'); }
+  function setAll(sel, text) {
+    Array.prototype.forEach.call(document.querySelectorAll(sel), function (el) { el.textContent = text; });
+  }
+
+  function load() {
+    show('v-loading');
+    if (!/^[a-f0-9]{64}$/.test(TOKEN)) { showError('This link is incomplete. Please open the full link from your email.'); return; }
+    api('getState', { token: TOKEN }).then(function (s) { state = s; render(); },
+      function (e) { showError(errText(e)); });
+  }
+
+  function render() {
+    var s = state;
+    $('address').textContent = s.address || '';
+    $('unit-label').textContent = s.unit ? ' · Unit ' + s.unit : '';
+    setAll('.js-email', s.email);
+    setAll('.js-fullname', s.fullName);
+    setSteps(s.status);
+
+    if (s.status === 'INVITED' || s.status === 'NEEDS_RESUBMISSION') {
+      var f = $('profile-form');
+      $('privacy').innerHTML = s.privacyHtml;   // built server-side with values escaped
+      $('email').textContent = s.email;
+      if (!idTypesLoaded) {
+        var sel = f.elements.IDType;
+        s.idTypes.forEach(function (t) { var o = document.createElement('option'); o.value = t; o.textContent = t; sel.appendChild(o); });
+        idTypesLoaded = true;
+      }
+      PROFILE_KEYS.forEach(function (k) {
+        if (s.profile && s.profile[k] != null && s.profile[k] !== '') f.elements[k].value = s.profile[k];
+      });
+      $('resubmit-box').hidden = !s.reviewNote;
+      $('resubmit-text').textContent = s.reviewNote || '';
+      $('id-hint').textContent = s.hasIdFile
+        ? 'Your ID is already on file. Upload a new one only if the lessor asked you to, or if you want to replace it.'
+        : 'JPG, PNG, or PDF, up to 5 MB. Make sure your name, photo, and ID number are readable.';
+      show('v-profile');
+    } else if (s.status === 'SUBMITTED') {
+      show('v-review');
+    } else if (s.status === 'APPROVED') {
+      injectDocCss(s.docCss);
+      $('rules-doc').innerHTML = s.rulesHtml;
+      show('v-rules');
+    } else if (s.status === 'RULES_ACCEPTED') {
+      injectDocCss(s.docCss);
+      $('contract-doc').innerHTML = s.contractHtml;
+      show('v-contract');
+      if (!pad) {
+        pad = new SigPad($('sig'), function (ink) { $('sig-ph').hidden = ink; });
+        $('sig-clear').addEventListener('click', function () { pad.clear(); });
+        window.addEventListener('resize', function () { if (pad && !pad.hasInk) pad.resize(); });
+      }
+      pad.resize();
+    } else if (s.status === 'TENANT_SIGNED') {
+      show('v-signed');
+    } else if (s.status === 'COMPLETED') {
+      show('v-complete');
+    } else {
+      showError('This link is not available.');
+    }
+  }
+
+  $('profile-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var f = ev.target;
+    formMsg(f, '');
+    var req = f.querySelectorAll('[required]');
+    for (var i = 0; i < req.length; i++) {
+      if (!String(req[i].value).trim()) {
+        var label = req[i].closest('label').childNodes[0].textContent.trim();
+        req[i].focus();
+        return formMsg(f, 'Please fill in: ' + label + '.');
+      }
+    }
+    var p = {};
+    PROFILE_KEYS.forEach(function (k) { p[k] = String(f.elements[k].value).trim(); });
+    p.LegalAgeConfirmed = f.elements.LegalAgeConfirmed.checked;
+    p.Consent = f.elements.Consent.checked;
+    if (+p.OccupantsCount > 1 && !p.OtherOccupants) return formMsg(f, 'Please list the names of the other occupants.');
+    if (!p.LegalAgeConfirmed) return formMsg(f, 'Please confirm that you are at least 18 years old.');
+    if (!p.Consent) return formMsg(f, 'Please read the privacy notice and give your consent to continue.');
+
+    var fl = f.elements.IDFile.files[0];
+    if (!fl && !state.hasIdFile) return formMsg(f, 'Please upload a photo or scan of your valid ID.');
+    if (fl && fl.size > state.maxIdBytes) return formMsg(f, 'The ID file is larger than 5 MB. Please use a smaller photo.');
+    if (fl && !/^(image\/jpeg|image\/png|application\/pdf)$/.test(fl.type)) return formMsg(f, 'The ID must be a JPG, PNG, or PDF file.');
+    if (p.IDExpiry && new Date(p.IDExpiry) < new Date()) return formMsg(f, 'This ID appears to be expired. Please use a valid, unexpired ID.');
+
+    busy(f, true, fl ? 'Uploading…' : 'Submitting…');
+    (fl ? readFileBase64(fl) : Promise.resolve(null))
+      .then(function (file) { return api('submitProfile', { token: TOKEN, profile: p, file: file }); })
+      .then(function () { busy(f, false); load(); }, function (e) { busy(f, false); formMsg(f, errText(e)); });
+  });
+
+  $('rules-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var f = ev.target;
+    formMsg(f, '');
+    if (!f.elements.agree.checked) return formMsg(f, 'Please tick the box to confirm you agree to the House Rules.');
+    if (!f.elements.typedName.value.trim()) return formMsg(f, 'Please type your full name.');
+    busy(f, true);
+    api('acceptRules', { token: TOKEN, typedName: f.elements.typedName.value })
+      .then(function () { busy(f, false); load(); }, function (e) { busy(f, false); formMsg(f, errText(e)); });
+  });
+
+  $('sign-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var f = ev.target;
+    formMsg(f, '');
+    if (!pad || !pad.hasInk) return formMsg(f, 'Please draw your signature in the box.');
+    if (!f.elements.typedName.value.trim()) return formMsg(f, 'Please type your full name.');
+    if (!f.elements.agree.checked) return formMsg(f, 'Please tick the box to agree to sign electronically.');
+    busy(f, true, 'Signing…');
+    api('signContract', { token: TOKEN, typedName: f.elements.typedName.value,
+                          signature: pad.toDataURL(), userAgent: navigator.userAgent })
+      .then(function () { busy(f, false); load(); }, function (e) { busy(f, false); formMsg(f, errText(e)); });
+  });
+
+  load();
+</script>
+</body>
+</html>

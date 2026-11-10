@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tenants">
+<title>Tenants · Admin</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar">
+    <div>
+      <h1>Tenants</h1>
+      <p id="address"></p>
+    </div>
+    <div class="actions" style="margin:0" id="top-actions" hidden>
+      <button class="btn small" type="button" id="btn-invite">+ Invite</button>
+      <button class="btn small secondary" type="button" id="btn-refresh">Refresh</button>
+    </div>
+  </header>
+
+  <section id="v-loading" class="card"><p class="muted"><span class="spinner"></span>Loading…</p></section>
+
+  <!-- No key yet -->
+  <section id="v-key" class="card" hidden>
+    <h2>Admin access</h2>
+    <p class="muted">Open the admin link from the Sheet (Tenant Onboarding &gt; Show admin link), or paste it here.</p>
+    <form id="key-form" novalidate>
+      <label class="f">Admin link or key
+        <input type="password" name="key" autocomplete="off"></label>
+      <div class="actions"><button class="btn" type="submit">Continue</button></div>
+      <div class="msg" data-msg hidden></div>
+    </form>
+  </section>
+
+  <!-- Tenant list -->
+  <section id="v-list" hidden>
+    <ul class="tlist" id="tlist"></ul>
+    <p class="muted" id="empty" hidden>No tenants yet. Use “+ Invite” to start.</p>
+    <p style="margin-top:24px"><button class="link" type="button" id="btn-signout">Forget admin access on this device</button></p>
+  </section>
+
+  <!-- Invite -->
+  <section id="v-invite" hidden>
+    <p><button class="link" type="button" data-back>&larr; Back to list</button></p>
+    <form id="invite-form" class="card" novalidate>
+      <h2>Invite a new tenant</h2>
+      <div class="grid">
+        <label class="f full">Tenant's name <span class="opt">(they confirm their full legal name later)</span>
+          <input type="text" name="name" maxlength="120" required></label>
+        <label class="f full">Tenant's email
+          <input type="email" name="email" maxlength="200" required inputmode="email" autocapitalize="off"></label>
+        <label class="f">Unit
+          <input type="text" name="unit" maxlength="20" placeholder="e.g., 3C" required></label>
+        <label class="f">Monthly rent (PHP)
+          <input type="number" name="rent" min="1" step="0.01" placeholder="9000" inputmode="decimal" required></label>
+        <label class="f full">Lease start date
+          <input type="date" name="startDate" required></label>
+      </div>
+      <p class="hint">The deposit is set to two months' rent, as in the contract.</p>
+      <label class="check"><input type="checkbox" name="sendEmail" checked> <span>Email the link to the tenant now</span></label>
+      <div class="actions"><button class="btn" type="submit">Create invitation</button></div>
+      <div class="msg" data-msg hidden></div>
+    </form>
+    <div class="card" id="invite-done" hidden>
+      <h2>Invitation created</h2>
+      <p id="invite-done-text"></p>
+      <div class="linkbox" id="invite-link"></div>
+      <div class="actions" id="invite-link-actions"></div>
+    </div>
+  </section>
+
+  <!-- Detail -->
+  <section id="v-detail" hidden>
+    <p><button class="link" type="button" data-back>&larr; Back to list</button></p>
+    <div class="card">
+      <h2 id="d-title"></h2>
+      <p style="margin-top:-6px"><span class="badge" id="d-badge"></span></p>
+      <table class="kv" id="d-rows"></table>
+    </div>
+    <div class="card" id="d-id" hidden>
+      <h2>Valid ID</h2>
+      <img class="idimg" id="d-idimg" alt="Valid ID" hidden>
+      <div class="actions" id="d-idpdf" hidden><button class="btn secondary" type="button" id="btn-idpdf">Open ID (PDF)</button></div>
+    </div>
+    <div class="card" id="d-review" hidden>
+      <h2>Review</h2>
+      <div class="actions" style="margin-top:0"><button class="btn ok" type="button" id="btn-approve">Approve ID and details</button></div>
+      <h3>Or send back with a note</h3>
+      <textarea id="d-note" maxlength="500" placeholder="The tenant sees this, e.g., The ID photo is blurry. Please upload a clearer photo."></textarea>
+      <div class="actions"><button class="btn warn" type="button" id="btn-resub">Send back</button></div>
+    </div>
+    <div class="card" id="d-actions-card">
+      <h2>Actions</h2>
+      <div class="actions" style="margin-top:0" id="d-actions"></div>
+      <div class="linkbox" id="d-linkbox" hidden></div>
+      <div class="actions" id="d-link-actions" hidden></div>
+    </div>
+    <div class="msg" id="d-msg" hidden></div>
+  </section>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/common.js"></script>
+<script>
+  var VIEWS = ['v-loading', 'v-key', 'v-list', 'v-invite', 'v-detail'];
+  var STORE = 'tenantOnboardingAdminKey';
+  var LABELS = {
+    INVITED: ['Invited', ''], SUBMITTED: ['To review', 'act'], NEEDS_RESUBMISSION: ['Sent back', ''],
+    APPROVED: ['Reading rules', ''], RULES_ACCEPTED: ['Signing', ''], TENANT_SIGNED: ['Waiting for lessor', 'act'],
+    COMPLETED: ['Completed', 'ok'], REVOKED: ['Revoked', 'off']
+  };
+  var KEY = '', current = null;
+
+  function show(id) { showView(VIEWS, id); $('top-actions').hidden = !(id === 'v-list' || id === 'v-detail' || id === 'v-invite'); }
+  function store(k) { try { localStorage.setItem(STORE, k); } catch (e) { /* private mode */ } }
+  function stored() { try { return localStorage.getItem(STORE) || ''; } catch (e) { return ''; } }
+  function forget() { try { localStorage.removeItem(STORE); } catch (e) { /* ignore */ } }
+  function call(action, payload) { return api(action, Object.assign({ key: KEY }, payload || {})); }
+  function badge(el, status, expired) {
+    var l = LABELS[status] || [status, ''];
+    el.textContent = expired ? 'Link expired' : l[0];
+    el.className = 'badge ' + (expired ? 'off' : l[1]);
+  }
+  function detailMsg(text, kind) { var m = $('d-msg'); m.textContent = text || ''; m.className = 'msg ' + (kind || 'err'); m.hidden = !text; }
+  function keyFrom(text) { var m = /k=([a-f0-9]{64})/.exec(text) || /^([a-f0-9]{64})$/.exec(String(text).trim()); return m ? m[1] : ''; }
+
+  /* ---------- start ---------- */
+  function start() {
+    KEY = keyFrom(location.hash) || stored();
+    if (!KEY) { show('v-key'); return; }
+    store(KEY);
+    loadList();
+  }
+
+  $('key-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var k = keyFrom(ev.target.elements.key.value);
+    if (!k) return formMsg(ev.target, 'That does not look like an admin link or key.');
+    KEY = k; store(k); loadList();
+  });
+
+  $('btn-signout').addEventListener('click', function () {
+    forget(); KEY = '';
+    history.replaceState(null, '', location.pathname);
+    show('v-key');
+  });
+
+  /* ---------- list ---------- */
+  function loadList() {
+    show('v-loading');
+    call('adminList').then(function (d) {
+      $('address').textContent = d.address || '';
+      var ul = $('tlist');
+      ul.innerHTML = '';
+      d.tenants.forEach(function (t) {
+        var li = document.createElement('li');
+        var left = document.createElement('div');
+        var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = t.name;
+        var sub = document.createElement('div'); sub.className = 'sub'; sub.textContent = 'Unit ' + t.unit + ' · ' + t.email;
+        left.appendChild(nm); left.appendChild(sub);
+        var b = document.createElement('span'); badge(b, t.status, t.expired);
+        li.appendChild(left); li.appendChild(b);
+        li.addEventListener('click', function () { openDetail(t.id); });
+        ul.appendChild(li);
+      });
+      $('empty').hidden = d.tenants.length > 0;
+      show('v-list');
+    }, function (e) {
+      if (/admin link is not valid/.test(errText(e))) { forget(); KEY = ''; show('v-key'); formMsg($('key-form'), errText(e)); }
+      else { show('v-key'); formMsg($('key-form'), errText(e)); }
+    });
+  }
+
+  $('btn-refresh').addEventListener('click', function () { current ? openDetail(current.id) : loadList(); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-back]'), function (b) {
+    b.addEventListener('click', function () { current = null; loadList(); });
+  });
+
+  /* ---------- invite ---------- */
+  $('btn-invite').addEventListener('click', function () {
+    current = null;
+    $('invite-form').reset(); $('invite-form').hidden = false; $('invite-done').hidden = true;
+    formMsg($('invite-form'), '');
+    show('v-invite');
+  });
+
+  $('invite-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var f = ev.target, el = f.elements;
+    formMsg(f, '');
+    var form = { name: el.name.value, email: el.email.value, unit: el.unit.value, rent: el.rent.value,
+                 startDate: el.startDate.value, sendEmail: el.sendEmail.checked };
+    busy(f, true, 'Creating…');
+    call('adminInvite', { form: form }).then(function (r) {
+      busy(f, false);
+      f.hidden = true;
+      $('invite-done').hidden = false;
+      $('invite-done-text').textContent = r.emailed
+        ? 'The link was emailed to the tenant. You can also share it directly:'
+        : 'Send this personal link to the tenant:';
+      showLink($('invite-link'), $('invite-link-actions'), r.link, 'Your tenant onboarding link');
+    }, function (e) { busy(f, false); formMsg(f, errText(e)); });
+  });
+
+  /* ---------- link sharing ---------- */
+  function showLink(box, actions, link, shareTitle) {
+    box.textContent = link; box.hidden = false;
+    actions.innerHTML = ''; actions.hidden = false;
+    var copy = document.createElement('button');
+    copy.type = 'button'; copy.className = 'btn small secondary'; copy.textContent = 'Copy link';
+    copy.addEventListener('click', function () {
+      var done = function () { copy.textContent = 'Copied'; };
+      if (navigator.clipboard) navigator.clipboard.writeText(link).then(done, function () { selectText(box); });
+      else selectText(box);
+    });
+    actions.appendChild(copy);
+    if (navigator.share) {
+      var sh = document.createElement('button');
+      sh.type = 'button'; sh.className = 'btn small secondary'; sh.textContent = 'Share…';
+      sh.addEventListener('click', function () { navigator.share({ title: shareTitle, url: link }).catch(function () {}); });
+      actions.appendChild(sh);
+    }
+  }
+  function selectText(el) {
+    var r = document.createRange(); r.selectNodeContents(el);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+
+  /** Opens a PDF from base64. The window is opened first so mobile browsers do not block it. */
+  function openPdf(promiseFactory) {
+    var w = window.open('', '_blank');
+    promiseFactory().then(function (d) {
+      var url = URL.createObjectURL(base64ToBlob(d.base64, 'application/pdf'));
+      if (w) w.location.href = url;
+      else { var a = document.createElement('a'); a.href = url; a.download = d.name || 'document.pdf'; a.click(); }
+    }, function (e) { if (w) w.close(); detailMsg(errText(e)); });
+  }
+
+  /* ---------- detail ---------- */
+  function openDetail(id) {
+    show('v-loading');
+    detailMsg('');
+    call('adminGetTenant', { id: id }).then(function (d) {
+      current = d;
+      $('d-title').textContent = d.name + ' · Unit ' + d.unit;
+      badge($('d-badge'), d.status, false);
+      var tbl = $('d-rows'); tbl.innerHTML = '';
+      d.rows.forEach(function (r) {
+        var tr = document.createElement('tr');
+        var k = document.createElement('td'); k.className = 'k'; k.textContent = r[0];
+        var v = document.createElement('td'); v.textContent = r[1];
+        tr.appendChild(k); tr.appendChild(v); tbl.appendChild(tr);
+      });
+
+      $('d-id').hidden = !d.idFile;
+      $('d-idimg').hidden = true; $('d-idpdf').hidden = true;
+      if (d.idFile) {
+        if (/^image\//.test(d.idFile.mime)) { $('d-idimg').src = 'data:' + d.idFile.mime + ';base64,' + d.idFile.base64; $('d-idimg').hidden = false; }
+        else { $('d-idpdf').hidden = false; }
+      }
+      $('d-review').hidden = d.status !== 'SUBMITTED';
+      $('d-note').value = '';
+      buildActions(d);
+      show('v-detail');
+    }, function (e) { show('v-list'); alert(errText(e)); });
+  }
+
+  $('btn-idpdf').addEventListener('click', function () {
+    var f = current.idFile;
+    openPdf(function () { return Promise.resolve({ base64: f.base64, name: 'ID.pdf' }); });
+  });
+
+  function actionBtn(label, cls, fn) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn small ' + (cls || 'secondary'); b.textContent = label;
+    b.addEventListener('click', function () { fn(b); });
+    $('d-actions').appendChild(b);
+  }
+
+  function withBusy(btn, label, p) {
+    var old = btn.textContent; btn.disabled = true; btn.textContent = label;
+    return p.then(function (r) { btn.disabled = false; btn.textContent = old; return r; },
+                  function (e) { btn.disabled = false; btn.textContent = old; detailMsg(errText(e)); throw e; });
+  }
+
+  function buildActions(d) {
+    $('d-actions').innerHTML = '';
+    $('d-linkbox').hidden = true; $('d-link-actions').hidden = true;
+    var s = d.status;
+    if (['INVITED', 'NEEDS_RESUBMISSION', 'SUBMITTED', 'APPROVED', 'RULES_ACCEPTED', 'TENANT_SIGNED'].indexOf(s) >= 0) {
+      actionBtn('Get tenant link', 'secondary', function (b) {
+        withBusy(b, 'Getting…', call('adminRefreshLink', { id: d.id })).then(function (r) {
+          showLink($('d-linkbox'), $('d-link-actions'), r.link, 'Your tenant onboarding link');
+          detailMsg(r.expires ? 'Link valid until ' + r.expires + '.' : '', 'ok');
+        });
+      });
+      actionBtn('Email link to tenant', 'secondary', function (b) {
+        withBusy(b, 'Sending…', call('adminRefreshLink', { id: d.id, email: true })).then(function () {
+          detailMsg('Link emailed to the tenant.', 'ok');
+        });
+      });
+    }
+    if (s === 'TENANT_SIGNED') {
+      actionBtn('Resend countersign link to lessor', '', function (b) {
+        withBusy(b, 'Sending…', call('adminResendLessorLink', { id: d.id })).then(function (r) {
+          detailMsg('Countersigning link sent to ' + r.sentTo + '. You can also share it directly:', 'ok');
+          showLink($('d-linkbox'), $('d-link-actions'), r.link, 'Countersign Contract of Lease');
+        });
+      });
+    }
+    if (s === 'COMPLETED') {
+      actionBtn('Open signed PDF', '', function () {
+        openPdf(function () { return call('adminGetSignedPdf', { id: d.id }); });
+      });
+    }
+    if (s !== 'COMPLETED' && s !== 'REVOKED') {
+      actionBtn('Revoke link', 'danger', function (b) {
+        if (!confirm('Revoke the link for ' + d.name + '? They will no longer be able to open it.')) return;
+        withBusy(b, 'Revoking…', call('adminRevoke', { id: d.id })).then(function () { openDetail(d.id); });
+      });
+    }
+    $('d-actions-card').hidden = $('d-actions').children.length === 0;
+  }
+
+  $('btn-approve').addEventListener('click', function () {
+    var b = this;
+    withBusy(b, 'Approving…', call('adminApprove', { id: current.id })).then(function () {
+      openDetail(current.id);
+      setTimeout(function () { detailMsg('Approved. The tenant was emailed to continue.', 'ok'); }, 0);
+    });
+  });
+
+  $('btn-resub').addEventListener('click', function () {
+    var note = $('d-note').value.trim();
+    if (!note) return detailMsg('Write a short note first.');
+    var b = this;
+    withBusy(b, 'Sending…', call('adminRequestResubmission', { id: current.id, note: note })).then(function () {
+      openDetail(current.id);
+      setTimeout(function () { detailMsg('Sent back. The tenant was emailed your note.', 'ok'); }, 0);
+    });
+  });
+
+  start();
+</script>
+</body>
+</html>

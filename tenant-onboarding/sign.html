@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Countersign Contract</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Countersign Contract of Lease</h1>
+    <p><span id="address"></span><span id="unit-label"></span></p>
+  </header>
+
+  <section id="v-loading" class="card" style="margin-top:16px"><p class="muted"><span class="spinner"></span>Loading…</p></section>
+
+  <section id="v-error" class="card" style="margin-top:16px" hidden>
+    <h2>Link not available</h2>
+    <p id="error-text"></p>
+    <div class="actions"><button class="btn secondary" type="button" onclick="load()">Try again</button></div>
+  </section>
+
+  <section id="v-sign" hidden>
+    <div class="card" style="margin-top:16px">
+      <h2>Ready for your signature</h2>
+      <p style="margin:0"><b id="tenant-name"></b> has signed. Please review the Contract of Lease and House Rules below, then sign at the bottom. Your one signature is applied to both documents.</p>
+    </div>
+    <div class="docview" id="contract-doc"></div>
+    <div class="docview" id="rules-doc"></div>
+    <form id="sign-form" class="card" novalidate>
+      <h2>Sign as LESSOR</h2>
+      <label class="f">Draw your signature</label>
+      <div class="sigbox"><canvas id="sig"></canvas><div class="ph" id="sig-ph">Sign here with your finger</div></div>
+      <div class="actions" style="margin-top:6px"><button type="button" class="link" id="sig-clear">Clear signature</button></div>
+      <label class="f" style="margin-top:12px">Type your full name
+        <input type="text" name="typedName" maxlength="120" autocomplete="off">
+        <div class="hint">Exactly as: <b id="lessor-name"></b></div></label>
+      <label class="check"><input type="checkbox" name="agree"> <span>I agree to countersign this Contract of Lease and the House Rules electronically, and I understand that my electronic signature is as binding as a handwritten one.</span></label>
+      <div class="actions"><button class="btn" type="submit">Countersign</button></div>
+      <div class="msg" data-msg hidden></div>
+    </form>
+  </section>
+
+  <section id="v-done" class="card" style="margin-top:16px" hidden>
+    <div class="done-icon">✓</div>
+    <h2>Countersigned</h2>
+    <p>The fully signed Contract of Lease has been emailed to you and to the tenant. Nothing else is needed.</p>
+  </section>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/common.js"></script>
+<script>
+  var VIEWS = ['v-loading', 'v-error', 'v-sign', 'v-done'];
+  var TOKEN = hashParam('t');
+  var pad = null;
+
+  function show(id) { showView(VIEWS, id); }
+  function showError(text) { $('error-text').textContent = text; show('v-error'); }
+
+  function load() {
+    show('v-loading');
+    if (!/^[a-f0-9]{64}$/.test(TOKEN)) { showError('This link is incomplete. Please open the full link from your email.'); return; }
+    api('lessorGetState', { token: TOKEN }).then(render, function (e) { showError(errText(e)); });
+  }
+
+  function render(s) {
+    $('address').textContent = s.address || '';
+    $('unit-label').textContent = s.unit ? ' · Unit ' + s.unit : '';
+    if (s.status === 'COMPLETED') { show('v-done'); return; }
+    injectDocCss(s.docCss);
+    $('tenant-name').textContent = s.tenantName;
+    $('lessor-name').textContent = s.lessorName;
+    $('contract-doc').innerHTML = s.contractHtml;   // built server-side with values escaped
+    $('rules-doc').innerHTML = s.rulesHtml;
+    show('v-sign');
+    if (!pad) {
+      pad = new SigPad($('sig'), function (ink) { $('sig-ph').hidden = ink; });
+      $('sig-clear').addEventListener('click', function () { pad.clear(); });
+      window.addEventListener('resize', function () { if (pad && !pad.hasInk) pad.resize(); });
+    }
+    pad.resize();
+  }
+
+  $('sign-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var f = ev.target;
+    formMsg(f, '');
+    if (!pad || !pad.hasInk) return formMsg(f, 'Please draw your signature in the box.');
+    if (!f.elements.typedName.value.trim()) return formMsg(f, 'Please type your full name.');
+    if (!f.elements.agree.checked) return formMsg(f, 'Please tick the box to agree to sign electronically.');
+    busy(f, true, 'Signing and sending…');
+    api('lessorCountersign', { token: TOKEN, typedName: f.elements.typedName.value,
+                               signature: pad.toDataURL(), userAgent: navigator.userAgent })
+      .then(function () { busy(f, false); show('v-done'); }, function (e) { busy(f, false); formMsg(f, errText(e)); });
+  });
+
+  load();
+</script>
+</body>
+</html>
