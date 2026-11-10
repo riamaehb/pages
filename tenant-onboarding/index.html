@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <title>Tenant Onboarding</title>
-<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/app.css?v=3">
 </head>
 <body>
 <div class="wrap">
@@ -36,7 +36,7 @@
     <form id="profile-form" class="card" novalidate>
       <h2>Your profile</h2>
       <div class="privacy" id="privacy"></div>
-      <p class="muted" style="margin-top:0">Email on file: <b id="email"></b></p>
+      <p class="muted" style="margin-top:0" id="email-line">Email on file: <b id="email"></b></p>
 
       <div class="grid">
         <label class="f full">Full legal name <span class="opt">(as shown on your ID)</span>
@@ -90,7 +90,7 @@
   <!-- Step 2: Waiting for review -->
   <section id="v-review" class="card" hidden>
     <h2>Submitted for review</h2>
-    <p>Thank you. The lessor will review your details and valid ID. You will receive an email when you can continue to the House Rules and Contract of Lease, using this same link.</p>
+    <p>Thank you. The lessor will review your details and valid ID. You will be notified <span class="js-via"></span> when you can continue to the House Rules and Contract of Lease, using this same link.</p>
   </section>
 
   <!-- Step 3: House Rules -->
@@ -130,18 +130,20 @@
   <section id="v-signed" class="card" hidden>
     <div class="done-icon">✓</div>
     <h2>Signed</h2>
-    <p>Your signature has been recorded. Once the lessor countersigns, the fully signed Contract of Lease and House Rules will be emailed to <b class="js-email"></b>.</p>
+    <p>Your signature has been recorded. Once the lessor countersigns, you will be notified <span class="js-via"></span>, and you can download the fully signed Contract of Lease and House Rules from this same link.</p>
   </section>
 
   <section id="v-complete" class="card" hidden>
     <div class="done-icon">✓</div>
     <h2>All done</h2>
-    <p>Your Contract of Lease has been signed by both parties. A PDF copy was emailed to <b class="js-email"></b>. Please keep it for your records.</p>
+    <p>Your Contract of Lease has been signed by both parties.<span id="emailed-note"> A PDF copy was also emailed to <b class="js-email"></b>.</span> Please download and keep a copy for your records.</p>
+    <div class="actions"><button class="btn" type="button" id="btn-pdf">Download signed contract (PDF)</button></div>
+    <div class="msg" id="pdf-msg" hidden></div>
   </section>
 </div>
 
-<script src="assets/config.js"></script>
-<script src="assets/common.js"></script>
+<script src="assets/config.js?v=3"></script>
+<script src="assets/common.js?v=3"></script>
 <script>
   var VIEWS = ['v-loading', 'v-error', 'v-profile', 'v-review', 'v-rules', 'v-contract', 'v-signed', 'v-complete'];
   var STEP_OF = { INVITED: 0, NEEDS_RESUBMISSION: 0, SUBMITTED: 1, APPROVED: 2, RULES_ACCEPTED: 3, TENANT_SIGNED: 4, COMPLETED: 5 };
@@ -173,7 +175,10 @@
     $('address').textContent = s.address || '';
     $('unit-label').textContent = s.unit ? ' · Unit ' + s.unit : '';
     setAll('.js-email', s.email);
+    setAll('.js-via', s.hasEmail ? 'by email at ' + s.email : 'by message from the lessor');
     setAll('.js-fullname', s.fullName);
+    $('email-line').hidden = !s.hasEmail;
+    $('emailed-note').hidden = !s.hasEmail;
     setSteps(s.status);
 
     if (s.status === 'INVITED' || s.status === 'NEEDS_RESUBMISSION') {
@@ -273,6 +278,23 @@
     api('signContract', { token: TOKEN, typedName: f.elements.typedName.value,
                           signature: pad.toDataURL(), userAgent: navigator.userAgent })
       .then(function () { busy(f, false); load(); }, function (e) { busy(f, false); formMsg(f, errText(e)); });
+  });
+
+  /* Download the signed PDF. On iPhones a new tab is opened first so Safari does not block it. */
+  $('btn-pdf').addEventListener('click', function () {
+    var b = this, m = $('pdf-msg');
+    var w = window.open('', '_blank');
+    b.disabled = true; b.textContent = 'Preparing…'; m.hidden = true;
+    api('getSignedPdf', { token: TOKEN }).then(function (d) {
+      var url = URL.createObjectURL(base64ToBlob(d.base64, 'application/pdf'));
+      if (w) { w.location.href = url; }
+      else { var a = document.createElement('a'); a.href = url; a.download = d.name || 'Contract.pdf'; a.click(); }
+      b.disabled = false; b.textContent = 'Download signed contract (PDF)';
+    }, function (e) {
+      if (w) w.close();
+      b.disabled = false; b.textContent = 'Download signed contract (PDF)';
+      m.className = 'msg err'; m.textContent = errText(e); m.hidden = false;
+    });
   });
 
   load();

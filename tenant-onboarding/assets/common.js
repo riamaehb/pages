@@ -6,9 +6,12 @@
 
   /** Calls the Apps Script API. Uses text/plain so the browser sends it without a CORS preflight. */
   window.api = function (action, payload) {
-    var url = (window.APP_CONFIG || {}).API_URL || '';
+    var raw = String((window.APP_CONFIG || {}).API_URL || '').trim();
+    var url = raw.split(/[?#]/)[0];
     if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) {
-      return Promise.reject(new Error('This page is not configured yet. Please contact the lessor.'));
+      console.error('API_URL in assets/config.js is not a web app /exec URL. Found: "' + raw + '"');
+      return Promise.reject(new Error('This page is not configured yet. Please contact the lessor. ' +
+        '(Setup detail: API_URL in assets/config.js must be the web app URL ending in /exec.)'));
     }
     var body = JSON.stringify(Object.assign({ action: action }, payload || {}));
     return fetch(url, {

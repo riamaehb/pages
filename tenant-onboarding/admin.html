@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Tenants">
 <title>Tenants · Admin</title>
-<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/app.css?v=3">
 </head>
 <body>
 <div class="wrap">
@@ -52,8 +52,11 @@
       <div class="grid">
         <label class="f full">Tenant's name <span class="opt">(they confirm their full legal name later)</span>
           <input type="text" name="name" maxlength="120" required></label>
-        <label class="f full">Tenant's email
-          <input type="email" name="email" maxlength="200" required inputmode="email" autocapitalize="off"></label>
+        <label class="f">Tenant's email <span class="opt">(optional)</span>
+          <input type="email" name="email" maxlength="200" inputmode="email" autocapitalize="off">
+          <div class="hint">Leave blank to send everything by WhatsApp yourself.</div></label>
+        <label class="f">WhatsApp number <span class="opt">(optional)</span>
+          <input type="tel" name="mobile" maxlength="20" placeholder="09XX XXX XXXX"></label>
         <label class="f">Unit
           <input type="text" name="unit" maxlength="20" placeholder="e.g., 3C" required></label>
         <label class="f">Monthly rent (PHP)
@@ -62,7 +65,7 @@
           <input type="date" name="startDate" required></label>
       </div>
       <p class="hint">The deposit is set to two months' rent, as in the contract.</p>
-      <label class="check"><input type="checkbox" name="sendEmail" checked> <span>Email the link to the tenant now</span></label>
+      <label class="check"><input type="checkbox" name="sendEmail" checked> <span>Email the link to the tenant now (if an email is given)</span></label>
       <div class="actions"><button class="btn" type="submit">Create invitation</button></div>
       <div class="msg" data-msg hidden></div>
     </form>
@@ -104,8 +107,8 @@
   </section>
 </div>
 
-<script src="assets/config.js"></script>
-<script src="assets/common.js"></script>
+<script src="assets/config.js?v=3"></script>
+<script src="assets/common.js?v=3"></script>
 <script>
   var VIEWS = ['v-loading', 'v-key', 'v-list', 'v-invite', 'v-detail'];
   var STORE = 'tenantOnboardingAdminKey';
@@ -128,6 +131,39 @@
   }
   function detailMsg(text, kind) { var m = $('d-msg'); m.textContent = text || ''; m.className = 'msg ' + (kind || 'err'); m.hidden = !text; }
   function keyFrom(text) { var m = /k=([a-f0-9]{64})/.exec(text) || /^([a-f0-9]{64})$/.exec(String(text).trim()); return m ? m[1] : ''; }
+
+  /* ---------- WhatsApp ---------- */
+  var ADDRESS = '';
+  /** wa.me link; Philippine numbers starting with 0 are converted to +63. Without a number, WhatsApp asks for a contact. */
+  function waUrl(mobile, text) {
+    var d = String(mobile || '').replace(/\D/g, '');
+    if (/^0\d{10}$/.test(d)) d = '63' + d.slice(1);
+    else if (/^9\d{9}$/.test(d)) d = '63' + d;
+    return 'https://wa.me/' + d + '?text=' + encodeURIComponent(text);
+  }
+  function waText(kind, x) {
+    var hi = 'Hi ' + x.name + ', ';
+    var unit = 'Unit ' + x.unit + (ADDRESS ? ', ' + ADDRESS : '');
+    var priv = ' This link is for you only, please don\'t share it.';
+    switch (kind) {
+      case 'INVITED': return hi + 'this is Ria Mae for the lessor of ' + unit + '. Please complete your tenant onboarding using this personal link: ' + x.link + priv;
+      case 'NEEDS_RESUBMISSION': return hi + 'please update your onboarding details for ' + unit + '. Note: ' + (x.reviewNote || '') + ' Your link: ' + x.link;
+      case 'SUBMITTED': return hi + 'we received your details for ' + unit + ' and are reviewing them. You can check your status here: ' + x.link;
+      case 'APPROVED': return hi + 'your details and valid ID for ' + unit + ' have been approved. Please open your link to read the House Rules and sign the Contract of Lease: ' + x.link;
+      case 'RULES_ACCEPTED': return hi + 'please open your link to review and sign the Contract of Lease for ' + unit + ': ' + x.link;
+      case 'TENANT_SIGNED': return hi + 'we received your signature on the Contract of Lease for ' + unit + '. I will message you once the lessor countersigns.';
+      case 'COMPLETED': return hi + 'your Contract of Lease for ' + unit + ' is now signed by both parties. Please download and keep your copy here: ' + x.link;
+      default: return hi + 'here is your personal link: ' + x.link;
+    }
+  }
+  function waButton(container, mobile, text, label) {
+    var a = document.createElement('a');
+    a.className = 'btn small'; a.style.background = '#1f7a4a';
+    a.href = waUrl(mobile, text); a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = label || 'Send via WhatsApp';
+    container.insertBefore(a, container.firstChild);
+    return a;
+  }
 
   /* ---------- start ---------- */
   function start() {
@@ -155,13 +191,14 @@
     show('v-loading');
     call('adminList').then(function (d) {
       $('address').textContent = d.address || '';
+      ADDRESS = d.address || '';
       var ul = $('tlist');
       ul.innerHTML = '';
       d.tenants.forEach(function (t) {
         var li = document.createElement('li');
         var left = document.createElement('div');
         var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = t.name;
-        var sub = document.createElement('div'); sub.className = 'sub'; sub.textContent = 'Unit ' + t.unit + ' · ' + t.email;
+        var sub = document.createElement('div'); sub.className = 'sub'; sub.textContent = 'Unit ' + t.unit + ' · ' + (t.email || 'WhatsApp');
         left.appendChild(nm); left.appendChild(sub);
         var b = document.createElement('span'); badge(b, t.status, t.expired);
         li.appendChild(left); li.appendChild(b);
@@ -193,17 +230,18 @@
     ev.preventDefault();
     var f = ev.target, el = f.elements;
     formMsg(f, '');
-    var form = { name: el.name.value, email: el.email.value, unit: el.unit.value, rent: el.rent.value,
-                 startDate: el.startDate.value, sendEmail: el.sendEmail.checked };
+    var form = { name: el.name.value, email: el.email.value, mobile: el.mobile.value, unit: el.unit.value,
+                 rent: el.rent.value, startDate: el.startDate.value, sendEmail: el.sendEmail.checked };
     busy(f, true, 'Creating…');
     call('adminInvite', { form: form }).then(function (r) {
       busy(f, false);
       f.hidden = true;
       $('invite-done').hidden = false;
       $('invite-done-text').textContent = r.emailed
-        ? 'The link was emailed to the tenant. You can also share it directly:'
-        : 'Send this personal link to the tenant:';
+        ? 'The link was emailed to the tenant. You can also send it by WhatsApp:'
+        : 'Send this personal link to the tenant by WhatsApp:';
       showLink($('invite-link'), $('invite-link-actions'), r.link, 'Your tenant onboarding link');
+      waButton($('invite-link-actions'), r.mobile, waText('INVITED', r));
     }, function (e) { busy(f, false); formMsg(f, errText(e)); });
   });
 
@@ -247,6 +285,7 @@
     detailMsg('');
     call('adminGetTenant', { id: id }).then(function (d) {
       current = d;
+      if (d.address) ADDRESS = d.address;
       $('d-title').textContent = d.name + ' · Unit ' + d.unit;
       badge($('d-badge'), d.status, false);
       var tbl = $('d-rows'); tbl.innerHTML = '';
@@ -292,18 +331,28 @@
     $('d-actions').innerHTML = '';
     $('d-linkbox').hidden = true; $('d-link-actions').hidden = true;
     var s = d.status;
+    // WhatsApp message suited to the current step (opens WhatsApp with the text ready to send).
+    if (s !== 'REVOKED' && d.link) {
+      var wa = document.createElement('a');
+      wa.className = 'btn small'; wa.style.background = '#1f7a4a';
+      wa.href = waUrl(d.mobile, waText(s, d)); wa.target = '_blank'; wa.rel = 'noopener';
+      wa.textContent = 'WhatsApp tenant';
+      $('d-actions').appendChild(wa);
+    }
     if (['INVITED', 'NEEDS_RESUBMISSION', 'SUBMITTED', 'APPROVED', 'RULES_ACCEPTED', 'TENANT_SIGNED'].indexOf(s) >= 0) {
-      actionBtn('Get tenant link', 'secondary', function (b) {
+      actionBtn(s === 'INVITED' || s === 'NEEDS_RESUBMISSION' ? 'Get link (extends expiry)' : 'Get tenant link', 'secondary', function (b) {
         withBusy(b, 'Getting…', call('adminRefreshLink', { id: d.id })).then(function (r) {
           showLink($('d-linkbox'), $('d-link-actions'), r.link, 'Your tenant onboarding link');
           detailMsg(r.expires ? 'Link valid until ' + r.expires + '.' : '', 'ok');
         });
       });
-      actionBtn('Email link to tenant', 'secondary', function (b) {
-        withBusy(b, 'Sending…', call('adminRefreshLink', { id: d.id, email: true })).then(function () {
-          detailMsg('Link emailed to the tenant.', 'ok');
+      if (d.hasEmail) {
+        actionBtn('Email link to tenant', 'secondary', function (b) {
+          withBusy(b, 'Sending…', call('adminRefreshLink', { id: d.id, email: true })).then(function () {
+            detailMsg('Link emailed to the tenant.', 'ok');
+          });
         });
-      });
+      }
     }
     if (s === 'TENANT_SIGNED') {
       actionBtn('Resend countersign link to lessor', '', function (b) {
@@ -317,6 +366,19 @@
       actionBtn('Open signed PDF', '', function () {
         openPdf(function () { return call('adminGetSignedPdf', { id: d.id }); });
       });
+      // On phones that can share files (most iPhones and Androids), send the PDF itself through WhatsApp.
+      if (navigator.canShare && navigator.canShare({ files: [new File(['x'], 'x.pdf', { type: 'application/pdf' })] })) {
+        var pdfFile = null;
+        actionBtn('Share signed PDF…', 'secondary', function (b) {
+          var doShare = function () { navigator.share({ files: [pdfFile], title: pdfFile.name }).catch(function () {}); };
+          if (pdfFile) return doShare();
+          // Sharing must follow a tap directly, so the first tap downloads and the second tap shares.
+          withBusy(b, 'Preparing…', call('adminGetSignedPdf', { id: d.id })).then(function (r) {
+            pdfFile = new File([base64ToBlob(r.base64, 'application/pdf')], r.name, { type: 'application/pdf' });
+            b.textContent = 'Tap again to share PDF';
+          });
+        });
+      }
     }
     if (s !== 'COMPLETED' && s !== 'REVOKED') {
       actionBtn('Revoke link', 'danger', function (b) {
@@ -331,7 +393,8 @@
     var b = this;
     withBusy(b, 'Approving…', call('adminApprove', { id: current.id })).then(function () {
       openDetail(current.id);
-      setTimeout(function () { detailMsg('Approved. The tenant was emailed to continue.', 'ok'); }, 0);
+      var via = current.hasEmail ? 'The tenant was emailed to continue.' : 'No email on file: tap "WhatsApp tenant" to tell them to continue.';
+      setTimeout(function () { detailMsg('Approved. ' + via, 'ok'); }, 0);
     });
   });
 
@@ -341,7 +404,8 @@
     var b = this;
     withBusy(b, 'Sending…', call('adminRequestResubmission', { id: current.id, note: note })).then(function () {
       openDetail(current.id);
-      setTimeout(function () { detailMsg('Sent back. The tenant was emailed your note.', 'ok'); }, 0);
+      var via = current.hasEmail ? 'The tenant was emailed your note.' : 'No email on file: tap "WhatsApp tenant" to send them your note.';
+      setTimeout(function () { detailMsg('Sent back. ' + via, 'ok'); }, 0);
     });
   });
 
