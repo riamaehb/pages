@@ -15,7 +15,7 @@
 :root{color-scheme:light;
 --bg:#ffffff;--ink:#1f2328;--mut:#5b6470;--sky:#0b6b3a;--hero:#8a1538;--herodk:#6e102c;--soft:#f7f8fa;--line:#e1e4e8;
 --acc:#8a1538;--accink:#8a1538;--card:#ffffff;
---green:#0b6b3a;--tintm:#f9edf1;--tintg:#e8f4ec;--ok:#0b6b3a;--okbg:#e9f6ee;--rv:#8a5a00;--rvbg:#fff8e6;--bad:#a11722;--badbg:#fbe2e4;--issue:#fbeff3}
+--green:#0b6b3a;--tintm:#f9edf1;--tintg:#f1f2f4;--gray:#eceef1;--ok:#0b6b3a;--okbg:#e9f6ee;--rv:#8a5a00;--rvbg:#fff8e6;--bad:#a11722;--badbg:#fbe2e4;--issue:#fbeff3}
 :root[data-theme]{color-scheme:light}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
@@ -63,23 +63,23 @@ th{font-size:14px;color:var(--mut);font-weight:600}
 html{scroll-snap-type:y proximity}
 .slide{min-height:calc(100vh - 57px);display:flex;flex-direction:column;justify-content:center;scroll-snap-align:start}
 .slide>.wrap{width:100%}
-.s-maroon{background:var(--hero);color:#fff}.s-green{background:var(--green);color:#fff}
+.s-maroon{background:var(--hero);color:#fff}.s-green{background:var(--gray);color:var(--ink)}
 .s-tm{background:var(--tintm)}.s-tg{background:var(--tintg)}
-.s-maroon .mut,.s-green .mut{color:rgba(255,255,255,.88)}
+.s-maroon .mut{color:rgba(255,255,255,.88)}
 .card .mut,.app .mut,.sheet .mut,.chain .mut{color:var(--mut)}
 .slide.band{padding-block:clamp(22px,4vh,52px)}
 .areas th,.areas td{padding:8px 10px;font-size:15px}#research p{font-size:15.5px;margin-bottom:.6em}
 .card,.app,.chain div,.sheet{color:var(--ink)}
-.sheet{background:#fff;border-radius:14px;padding:6px 14px;margin-top:8px}
-.s-green h2,.s-maroon h2{color:#fff}
-.s-green .join a,.s-green a{color:inherit}.sheet a{color:var(--hero);font-weight:600}
+.sheet{background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px 14px;margin-top:8px}
+.s-maroon h2{color:#fff}.s-green h2,#why h2,#projects h2,.slide h3{color:var(--hero)}.s-maroon h3,.card h3{color:inherit}
+.s-green a{color:var(--hero)}.sheet a{color:var(--hero);font-weight:600}
 .demonav{color:var(--mut);margin-bottom:6px}.demonav a{text-decoration:none;font-weight:600;color:var(--hero)}.demonav a[aria-current]{text-decoration:underline;text-underline-offset:4px}
-.s-tg .ask{color:var(--green)}.s-tg .rq div:first-child{border-color:var(--green)}
+
 #why .card:nth-child(odd){background:var(--tintm)}#why .card:nth-child(even){background:var(--tintg)}
-#why .card h3{color:var(--hero)}#why .card:nth-child(even) h3{color:var(--green)}#why .ex{background:#fff}
+#why .card h3{color:var(--hero)}#why .ex{background:#fff}
 #projects .card{border-top:0;background:var(--tintm)}#projects .card:nth-child(2){background:var(--tintg)}#projects .card h3{color:var(--hero)}#projects .ex{background:#fff}
 .chain b{color:var(--hero)}
-.join .card h3{color:var(--green)}
+.join .card h3{color:var(--hero)}
 .pager{position:fixed;right:16px;bottom:16px;z-index:6;display:flex;gap:6px;align-items:center;background:var(--hero);color:#fff;border-radius:99px;padding:4px;box-shadow:0 4px 16px rgba(0,0,0,.2);font-size:14px}
 .pager button{width:40px;height:40px;border-radius:99px;border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer}.pager button:hover{background:rgba(255,255,255,.18)}
 .pager span{min-width:52px;text-align:center;font-variant-numeric:tabular-nums}
@@ -109,6 +109,9 @@ select{font:16px Inter;min-height:44px;padding:6px 10px;border-radius:8px;border
 .c-fixed{background:var(--okbg);color:var(--ok)}.c-review{background:var(--rvbg);color:var(--rv);font-weight:600}
 .meter{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0;font-size:15px}
 .meter b{font-family:Outfit,Inter,sans-serif;font-size:26px;display:block;line-height:1}
+.meter.mini{margin:0 auto 0 0;gap:18px;align-items:baseline}.meter.mini b{display:inline;font-size:22px}
+.dc th,.dc td{padding:6px 10px}
+#dataclean .phead p{margin-bottom:4px}#dataclean .app{padding:14px 18px}
 .log{font-size:14px;max-height:180px;overflow:auto;margin:0;padding-inline-start:18px}
 .cols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
 .doc{font-family:Georgia,serif;font-size:16px;line-height:1.7;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
@@ -243,14 +246,23 @@ footer{border-top:1px solid var(--line);font-size:14px;color:var(--mut)}
         <button class="btn sm" data-op="date">4 · Normalize dates</button>
         <button class="btn sm" data-op="units">5 · Validate units</button>
         <button class="btn sm" data-op="dups">6 · Flag duplicates</button>
+      </div>
+      <div class="toolbar" style="align-items:center">
+        <div class="meter mini"><span><b id="mIssue">0</b> open issues</span><span><b id="mFix" style="color:var(--ok)">0</b> auto-fixed</span><span><b id="mRev" style="color:var(--rv)">0</b> need human review</span></div>
         <button class="btn sm" id="dcOrig" aria-pressed="false">Show original</button>
         <button class="btn sm" id="dcReset">Reset</button>
       </div>
-      <div class="meter"><div><b id="mIssue">0</b>open issues</div><div><b id="mFix" style="color:var(--ok)">0</b>auto-fixed</div><div><b id="mRev" style="color:var(--rv)">0</b>need human review</div></div>
       <div class="scroll"><table class="dc" id="dcTable"></table></div>
-      <p class="sm mut" style="margin-top:10px">Orange underline: detected issue. Green: fixed automatically. Amber: flagged for review. Hover a cell to see the note.</p>
-      <h4 style="margin:12px 0 6px;font-family:Outfit,Inter,sans-serif">Transformation log</h4>
-      <ol class="log" id="dcLog"><li class="mut">No operations yet.</li></ol>
+      <p class="sm mut" style="margin:8px 0 0">Maroon underline: detected issue. Green: fixed automatically. Amber: flagged for review. Hover a cell to see the note.</p>
+    </div>
+</div></section>
+
+<section class="band slide s-tm" id="dataclean-2"><div class="wrap">
+  <p class="sm demonav">Interactive example 3 of 4, continued · <a href="#dataclean">Back to DataClean</a></p>
+    <h3>DataClean: what happened to the data</h3>
+    <div class="app">
+      <h4 style="margin:0 0 6px;font-family:Outfit,Inter,sans-serif">Transformation log</h4>
+      <ol class="log" id="dcLog" style="max-height:none"><li class="mut">No operations yet.</li></ol>
     </div>
     <div class="rq"><div><b>Research question</b>Which cleaning operations can be automated reliably, and how should ambiguous cases be handled?</div><div><b>Possible SP</b>Build and evaluate a semi-automated cleaning assistant that combines deterministic rules, LLM suggestions, and human review.</div><div><b>Limitations</b>"08/12/2026" and "BSC" cannot be fixed by a rule alone. A converted value can look authoritative even when it is only a guess. They need context or a person.</div></div>
 </div></section>
@@ -269,8 +281,14 @@ footer{border-top:1px solid var(--line);font-size:14px;color:var(--mut)}
         <div><div id="odData"></div></div>
         <div><h4 style="margin:0 0 6px;font-family:Outfit,Inter,sans-serif">Access decisions</h4><div id="odLog"><p class="mut sm">Choose an action to request access.</p></div></div>
       </div>
-      <div style="margin-top:16px">
-        <div class="phead"><h4 style="margin:0;font-family:Outfit,Inter,sans-serif">Where does the data live?</h4><span class="seg" id="odArch"><button aria-pressed="true" data-a="c">Centralized</button><button aria-pressed="false" data-a="o">Organization-controlled</button></span></div>
+    </div>
+</div></section>
+
+<section class="band slide s-tg" id="owndata-2"><div class="wrap">
+  <p class="sm demonav">Interactive example 4 of 4, continued · <a href="#owndata">Back to OwnData</a></p>
+    <div class="app">
+      <div>
+        <div class="phead"><h3 style="margin:0">Where does the data live?</h3><span class="seg" id="odArch"><button aria-pressed="true" data-a="c">Centralized</button><button aria-pressed="false" data-a="o">Organization-controlled</button></span></div>
         <div class="arch" id="odDiagram"></div>
         <p class="sm mut" id="odArchNote"></p>
       </div>
